@@ -1,26 +1,186 @@
 @import "tailwindcss";
+@import "@fontsource-variable/fraunces/wght.css";
+@import "@fontsource-variable/fraunces/wght-italic.css";
+@import "@fontsource-variable/manrope";
 
+/* ------------------------------------------------------------------
+   LP LOCKS — jetons de design
+   Toute la palette est centralisée ici. Modifier une valeur met à jour
+   l'ensemble du site (classes Tailwind bg-forest, text-charcoal, etc.).
+------------------------------------------------------------------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --lp-ink: #111111; /* Noir profond — texte et contrastes */
+  --lp-white: #ffffff; /* Fonds principaux */
+  --lp-charcoal: #414844; /* Gris charbon — texte secondaire */
+  --lp-silver: #aeb4b1; /* Gris argent — bordures et détails */
+  --lp-forest: #174734; /* Vert forêt — couleur principale */
+  --lp-forest-deep: #0f3325; /* Vert forêt, état survolé / pressé */
+  --lp-sage: #78947e; /* Vert sauge — accents (fonds, filets, pictogrammes) */
+  --lp-sage-ink: #4c6652; /* Vert sauge assombri pour le TEXTE : contraste suffisant sur fond clair */
+  --lp-soft: #b5c7b5; /* Vert doux — cartes et surfaces */
+  --lp-mist: #e9f0e9; /* Vert très clair — fonds secondaires */
+  --lp-line: #dfe4e0; /* Filets discrets (dérivé du gris argent) */
+  --lp-error: #a3341f; /* Erreurs de formulaire */
+  --lp-whatsapp: #0e7a40; /* Accès WhatsApp (texte blanc lisible) */
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-ink: var(--lp-ink);
+  --color-white: var(--lp-white);
+  --color-charcoal: var(--lp-charcoal);
+  --color-silver: var(--lp-silver);
+  --color-forest: var(--lp-forest);
+  --color-forest-deep: var(--lp-forest-deep);
+  --color-sage: var(--lp-sage);
+  --color-sage-ink: var(--lp-sage-ink);
+  --color-soft: var(--lp-soft);
+  --color-mist: var(--lp-mist);
+  --color-line: var(--lp-line);
+  --color-error: var(--lp-error);
+  --color-whatsapp: var(--lp-whatsapp);
+
+  --font-display: "Fraunces Variable", Georgia, "Times New Roman", serif;
+  --font-sans: "Manrope Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 1.75rem;
+  --radius-panel: 2.25rem;
+
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --shadow-float: 0 1px 2px rgb(17 17 17 / 0.04), 0 12px 32px -8px rgb(17 17 17 / 0.14);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ------------------------------------------------------------------
+   Échelle typographique
+------------------------------------------------------------------- */
+@utility type-display {
+  font-family: var(--font-display);
+  font-weight: 380;
+  font-size: clamp(2.75rem, 1.6rem + 5.4vw, 6rem);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
+@utility type-h1 {
+  font-family: var(--font-display);
+  font-weight: 380;
+  font-size: clamp(2.375rem, 1.6rem + 3.6vw, 4.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}
+@utility type-h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2rem, 1.4rem + 2.6vw, 3.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+@utility type-h3 {
+  font-family: var(--font-display);
+  font-weight: 420;
+  font-size: clamp(1.375rem, 1.2rem + 0.7vw, 1.75rem);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+@utility type-lead {
+  font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);
+  line-height: 1.55;
+}
+@utility type-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Conteneur de page */
+@utility lp-container {
+  width: 100%;
+  max-width: 84rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+  @media (min-width: 48rem) {
+    padding-inline: 2.5rem;
   }
 }
 
+/* Texture des emplacements de visuels (rappel discret de mèches) */
+@utility lp-strands {
+  background-image:
+    radial-gradient(120% 80% at 20% 0%, rgb(255 255 255 / 0.16), transparent 60%),
+    repeating-linear-gradient(
+      96deg,
+      transparent 0 18px,
+      rgb(255 255 255 / 0.07) 18px 19px,
+      transparent 19px 31px,
+      rgb(0 0 0 / 0.05) 31px 32px
+    );
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--lp-white);
+  color: var(--lp-ink);
+  font-family: var(--font-sans);
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--lp-forest);
+  color: var(--lp-white);
+}
+
+:focus-visible {
+  outline: 2px solid var(--lp-forest);
+  outline-offset: 3px;
+}
+
+.on-dark :focus-visible,
+.on-dark:focus-visible {
+  outline-color: var(--lp-white);
+}
+
+dialog::backdrop {
+  background: rgb(17 17 17 / 0.45);
+  backdrop-filter: blur(4px);
+}
+
+@keyframes lp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* Entrées du hero : en CSS pur pour s'afficher sans attendre le JavaScript.
+   Le titre principal ne joue que sur la position (jamais sur l'opacité) afin d'être visible dès le premier affichage. */
+@keyframes lp-slide {
+  from {
+    transform: translateY(18px);
+  }
+}
+@keyframes lp-zoom {
+  from {
+    transform: scale(1.04);
+  }
+}
+@keyframes lp-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
