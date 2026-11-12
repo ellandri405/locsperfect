@@ -134,7 +134,7 @@ export function Configurator() {
         {/* Zone de visualisation + récapitulatif */}
         <div className={step >= STEP.summary || step === STEP.render ? "hidden lg:block" : undefined}>
           {/* Zone défilante sur ordinateur : focalisable pour pouvoir la parcourir au clavier. */}
-          <div role="region" aria-label="Aperçu et récapitulatif du projet" tabIndex={0} className="rounded-panel lg:sticky lg:top-24 lg:max-h-[calc(100svh-7rem)] lg:overflow-y-auto lg:pr-1">
+          <div role="region" aria-label="Aperçu et récapitulatif du projet" tabIndex={0} className="lg:sticky lg:top-24 lg:max-h-[calc(100svh-7rem)] lg:overflow-y-auto lg:p-1">
             {/* À l'étape « Rendu », les deux vues occupent le panneau principal : l'aperçu simple est masqué. */}
             <div className={cn("relative aspect-[4/3] overflow-hidden rounded-panel sm:aspect-[16/10] lg:aspect-[5/4]", step === STEP.render && "hidden")}>
               <AnimatePresence initial={false}>
