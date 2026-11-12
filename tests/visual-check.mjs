@@ -122,7 +122,7 @@ const recapText = async (page, vp) => {
 const pick = (page, name) => page.getByRole("radio", { name }).locator("xpath=..").click();
 const pickValue = (page, group, value) => page.locator(`input[name="${group}"][value="${value}"]`).locator("xpath=..").click();
 const next = async (page) => {
-  await visible(page, "button", /^(Continuer|Envoyer mon projet)$/).click();
+  await visible(page, "button", /^(Continuer|Voir mon estimation)$/).click();
   await page.waitForTimeout(500);
 };
 const stepIs = async (page, n) => (await page.getByRole("progressbar").getAttribute("aria-valuenow")) === String(n);
@@ -158,7 +158,7 @@ for (const vp of [viewports[1], viewports[4]]) {
   await context.close();
 }
 
-// 4 bis. Configurateur : parcours complet « départ de locks » (mobile et ordinateur).
+// 4 bis. Configurateur : parcours complet en cinq étapes, « départ de locks » (mobile et ordinateur).
 for (const vp of [viewports[1], viewports[4]]) {
   const context = await browser.newContext({ viewport: vp, acceptDownloads: true });
   const page = await context.newPage();
@@ -188,6 +188,10 @@ for (const vp of [viewports[1], viewports[4]]) {
   await pick(page, /20 pouces/);
   await pick(page, "Caramel");
   await pickValue(page, "epaisseur", "epaisse");
+  check((await page.getByRole("heading", { level: 2, name: "Style" }).count()) === 0 && (await page.getByRole("heading", { level: 2, name: "Morphologie du visage" }).count()) === 1, `${tag} — la morphologie du visage remplace le style`);
+  check((await page.locator('input[name="morphologie"]').count()) === 6, `${tag} — six morphologies proposées`);
+  await pickValue(page, "morphologie", "ovale");
+  check((await recapText(page, vp)).includes("Ovale"), `${tag} — morphologie reportée dans le récapitulatif`);
   await page.waitForTimeout(900);
   if (vp.width >= 1024) {
     const title = await page.getByTestId("apercu-titre").innerText();
@@ -196,27 +200,30 @@ for (const vp of [viewports[1], viewports[4]]) {
   await page.screenshot({ path: `${OUT}/configurateur-etape2-${vp.name}.png`, fullPage: vp.width > 1000 });
 
   await next(page);
-  check(await stepIs(page, 3), `${tag} — étape 3 (inspirations)`);
-  const first = page.locator("main ul button[aria-pressed]").first();
-  check(/longues, caramel/.test(await first.innerText()), `${tag} — inspiration la plus proche proposée en premier`);
-  await first.click();
-  check((await first.getAttribute("aria-pressed")) === "true", `${tag} — inspiration sélectionnable`);
-  await page.screenshot({ path: `${OUT}/configurateur-etape3-${vp.name}.png` });
+  check(await stepIs(page, 3), `${tag} — étape 3 (rendu)`);
+  check((await page.getByRole("progressbar").getAttribute("aria-valuemax")) === "5", `${tag} — parcours en cinq étapes`);
+  const face = page.getByRole("group", { name: "Vue de face" });
+  const profil = page.getByRole("group", { name: "Vue de profil" });
+  check((await face.isVisible()) && (await profil.isVisible()), `${tag} — rendu présenté de face et de profil`);
+  const views = await Promise.all([face.boundingBox(), profil.boundingBox()]);
+  check(Math.abs(views[0].y - views[1].y) < 4 && views[1].x > views[0].x && views[1].x + views[1].width <= vp.width, `${tag} — les deux vues côte à côte, dans l'écran`);
+  const rendu = await page.getByTestId("rendu-titre").innerText();
+  check(/longues, caramel/.test(rendu), `${tag} — le rendu correspond à la longueur et à la couleur choisies (${rendu})`);
+  const renduZone = norm(await page.locator("main").innerText());
+  check(renduZone.includes("Ovale") && renduZone.includes("Aperçu indicatif"), `${tag} — morphologie rappelée et mention « Aperçu indicatif »`);
+  check(renduZone.includes("ne sont pas encore disponibles"), `${tag} — absence de vues propres à la morphologie signalée, sans faux rendu`);
+  await page.screenshot({ path: `${OUT}/configurateur-etape3-${vp.name}.png`, fullPage: vp.width > 1000 });
+  // Choisir un autre rendu proche, puis revenir au plus proche.
+  await page.getByRole("button", { name: /voir ce rendu/ }).first().click();
+  check((await page.getByTestId("rendu-titre").innerText()) !== rendu, `${tag} — autre rendu sélectionnable`);
+  await page.getByRole("button", { name: "Revenir au rendu le plus proche de mes choix" }).click();
+  check((await page.getByTestId("rendu-titre").innerText()) === rendu, `${tag} — retour au rendu le plus proche`);
 
   await next(page);
-  check(await stepIs(page, 4), `${tag} — étape 4 (comparateur)`);
-  check((await page.getByRole("region", { name: /Proposition/ }).count()) === 2, `${tag} — deux propositions côte à côte`);
-  const boxes = await Promise.all([0, 1].map((i) => page.getByRole("region", { name: /Proposition/ }).nth(i).boundingBox()));
-  check(Math.abs(boxes[0].y - boxes[1].y) < 4 && boxes[1].x > boxes[0].x, `${tag} — affichage côte à côte`);
-  await page.getByLabel("Inspiration B").selectOption({ index: 5 });
-  await page.getByRole("region", { name: "Proposition B" }).getByRole("button", { name: "Choisir ce style" }).click();
-  check(await page.getByRole("region", { name: "Proposition B" }).getByRole("button", { name: "Style choisi" }).isVisible(), `${tag} — « Choisir ce style »`);
-  await page.screenshot({ path: `${OUT}/configurateur-etape4-${vp.name}.png` });
-
+  check(await stepIs(page, 4), `${tag} — étape 4 (récapitulatif)`);
+  check(await page.getByRole("heading", { level: 1, name: /Ton projet, en un coup d'œil\./ }).isVisible() && (await page.getByText("Vérifie tes choix. Chacun peut encore être modifié.").isVisible()), `${tag} — titre et consigne du récapitulatif`);
   await next(page);
-  check(await stepIs(page, 5), `${tag} — étape 5 (récapitulatif)`);
-  await next(page);
-  check(await stepIs(page, 5) && (await page.getByText(/Choisis ta localité pour estimer/).isVisible()), `${tag} — localité obligatoire`);
+  check(await stepIs(page, 4) && (await page.getByText(/Choisis ta localité pour estimer/).isVisible()), `${tag} — localité obligatoire`);
   await page.getByLabel("Localité").selectOption("Koumassi");
   check(norm(await page.locator("#champ-locality").innerText()).includes("Zone 4 — frais de déplacement : 6 000 FCFA."), `${tag} — zone identifiée et frais affichés`);
   check(norm(await page.getByTestId("total-estimatif").innerText()) === "De 137 200 à 160 000 FCFA", `${tag} — total : 34 000 + 6 000 + 1 200 × (81 à 100 locks)`);
@@ -226,18 +233,19 @@ for (const vp of [viewports[1], viewports[4]]) {
   await page.waitForTimeout(500);
   check(await stepIs(page, 2) && (await page.getByRole("radio", { name: /Instantané base peigne/ }).isChecked()), `${tag} — « Modifier » ramène à l'étape 2, choix conservés`);
   await pick(page, /101 à 120 locks/);
-  for (let i = 0; i < 3; i++) await next(page);
-  check(await stepIs(page, 5), `${tag} — retour au récapitulatif`);
+  for (let i = 0; i < 2; i++) await next(page);
+  check(await stepIs(page, 4), `${tag} — retour au récapitulatif`);
   check(norm(await page.getByTestId("total-estimatif").innerText()) === "De 168 200 à 191 000 FCFA", `${tag} — total recalculé : 41 000 + 6 000 + 1 200 × (101 à 120 locks)`);
 
   await next(page);
-  check(await stepIs(page, 6), `${tag} — étape 6 (estimation)`);
+  check(await stepIs(page, 5), `${tag} — étape 5 (estimation), dernière étape`);
+  check(await page.getByRole("heading", { level: 1, name: /Ton estimation\./ }).isVisible() && (await page.getByText("Le détail de ce qui peut être chiffré dès maintenant.").isVisible()), `${tag} — titre et consigne de l'estimation`);
+  check((await visible(page, "button", /^(Continuer|Voir mon estimation)$/).count()) === 0, `${tag} — plus d'étape après l'estimation`);
   const est = norm(await page.locator("main").innerText());
   check(est.includes("Départ de locks — Instantané base peigne") && est.includes("41 000 FCFA") && est.includes("1 200 FCFA la mèche × 101 à 120 locks") && est.includes("De 121 200 à 144 000 FCFA") && est.includes("Frais de déplacement"), `${tag} — détail de l'estimation`);
-  await page.screenshot({ path: `${OUT}/configurateur-etape6-${vp.name}.png`, fullPage: vp.width > 1000 });
+  await page.screenshot({ path: `${OUT}/configurateur-etape5-${vp.name}.png`, fullPage: vp.width > 1000 });
 
-  await next(page);
-  check(await stepIs(page, 7), `${tag} — étape 7 (envoi)`);
+  check(await page.getByRole("heading", { level: 2, name: /Envoie ton projet\./ }).isVisible(), `${tag} — envoi du projet disponible sous l'estimation`);
   await page.getByRole("button", { name: "Télécharger mon récapitulatif PDF" }).click();
   check(await page.getByText("Indique ton nom.").isVisible(), `${tag} — coordonnées exigées avant le PDF`);
   await page.getByLabel("Nom").fill("Aïcha Koné");
@@ -266,7 +274,7 @@ for (const vp of [viewports[1], viewports[4]]) {
   check(/^lp-locks-projet-\d{4}-\d{2}-\d{2}\.pdf$/.test(download.suggestedFilename()), `${tag} — PDF téléchargé (${download.suggestedFilename()})`);
   check(body.startsWith("%PDF-") && pdf.length > 20000, `${tag} — PDF valide (${Math.round(pdf.length / 1024)} Ko)`);
   for (const [label, needle] of [
-    ["nom de la marque", "LP LOCKS"], ["choix (technique)", "Instantan"], ["montant de la prestation", "41 000 FCFA"],
+    ["nom de la marque", "LP LOCKS"], ["morphologie du visage", "Ovale"], ["choix (technique)", "Instantan"], ["montant de la prestation", "41 000 FCFA"],
     ["frais de déplacement", "6 000 FCFA"], ["extensions", "De 121 200"], ["total identique au récapitulatif", "De 168 200"],
     ["mention d'estimation indicative", "Estimation indicative, sous r"], ["coordonnées", "+225 07 99 33 16 86"], ["nom de la cliente", "cha Kon"],
   ]) check(body.includes(needle), `${tag} — PDF : ${label}`);
@@ -280,7 +288,7 @@ for (const vp of [viewports[1], viewports[4]]) {
   check(url.startsWith("https://wa.me/2250799331686?text="), `${tag} — WhatsApp ouvert sur le bon numéro`);
   const msg = norm(decodeURIComponent(url.split("text=")[1] ?? ""));
   check(
-    ["Nom : Aïcha Koné", "Type de projet : Départ de locks durables", "Technique : Instantané base peigne", "Nombre de locks : 101 à 120 locks", "Matière : Naturelle", "Longueur : 20 pouces (51 cm)", "Couleur : Caramel", "Localité : Koumassi", "Date souhaitée : 15 juin 2030", "caramel & pointes plus claires ?", "Extensions — naturelle, 20 pouces : De 121 200 à 144 000 FCFA", "Total estimatif : De 168 200 à 191 000 FCFA", "je la joins"].every((t) => msg.includes(t)),
+    ["Nom : Aïcha Koné", "Type de projet : Départ de locks durables", "Technique : Instantané base peigne", "Nombre de locks : 101 à 120 locks", "Matière : Naturelle", "Longueur : 20 pouces (51 cm)", "Couleur : Caramel", "Morphologie du visage : Ovale", "Localité : Koumassi", "Date souhaitée : 15 juin 2030", "caramel & pointes plus claires ?", "Extensions — naturelle, 20 pouces : De 121 200 à 144 000 FCFA", "Total estimatif : De 168 200 à 191 000 FCFA", "je la joins"].every((t) => msg.includes(t)),
     `${tag} — message WhatsApp : tous les choix et l'estimation transmis`,
   );
   check(await page.getByText(/n'est pas une\s+réservation/).first().isVisible(), `${tag} — aucune fausse confirmation de réservation`);
@@ -288,10 +296,10 @@ for (const vp of [viewports[1], viewports[4]]) {
   check(!saved.includes("Aïcha") && !saved.includes("0799") && !saved.includes("07 99"), `${tag} — coordonnées non enregistrées sur l'appareil`);
 
   await page.reload({ waitUntil: "networkidle" });
-  check(await stepIs(page, 7), `${tag} — reprise du projet à la même étape après rechargement`);
+  check(await stepIs(page, 5), `${tag} — reprise du projet à la même étape après rechargement`);
   await page.getByRole("button", { name: "Modifier mes choix" }).click();
   await page.waitForTimeout(500);
-  check(await stepIs(page, 5), `${tag} — « Modifier mes choix »`);
+  check(await stepIs(page, 4), `${tag} — « Modifier mes choix » ramène au récapitulatif`);
   check(errors.length === 0, `${tag} — aucune erreur JavaScript ${errors.join(" | ")}`);
   await context.close();
 }
@@ -317,7 +325,7 @@ for (const vp of [viewports[1], viewports[4]]) {
   await next(page);
   check(await stepIs(page, 2), "temporaires — nombre de locks obligatoire");
   await pick(page, /60 à 80 locks/);
-  for (let i = 0; i < 3; i++) await next(page);
+  for (let i = 0; i < 2; i++) await next(page);
   await page.getByLabel("Localité").selectOption("Yopougon");
   check(norm(await page.locator("#champ-locality").innerText()).includes("Zone 5 — frais de déplacement sur devis"), "temporaires — zone 5 : frais sur devis");
   check(norm(await page.getByTestId("total-estimatif").innerText()) === "À partir de 30 000 FCFA", "temporaires — pose 25 000 + 5 000 de supplément ; extensions et déplacement sur devis, non additionnés");
@@ -325,7 +333,7 @@ for (const vp of [viewports[1], viewports[4]]) {
   await page.getByRole("button", { name: "Modifier : Longueur" }).click();
   await page.waitForTimeout(500);
   await pickValue(page, "longueur", "12");
-  for (let i = 0; i < 3; i++) await next(page);
+  for (let i = 0; i < 2; i++) await next(page);
   await page.getByLabel("Localité").selectOption("Riviera 2");
   check(norm(await page.getByTestId("total-estimatif").innerText()) === "À partir de 40 000 FCFA", "temporaires — pose 30 000 + extensions 100 FCFA × 60 locks + déplacement 4 000");
   await page.getByRole("button", { name: "Modifier : Base de la pose" }).click();
@@ -333,12 +341,12 @@ for (const vp of [viewports[1], viewports[4]]) {
   await pick(page, /Base au peigne/);
   await pick(page, /101 à 120 locks/);
   await pickValue(page, "matiere", "naturelle");
-  for (let i = 0; i < 3; i++) await next(page);
+  for (let i = 0; i < 2; i++) await next(page);
   check(norm(await page.getByTestId("total-estimatif").innerText()) === "De 122 700 à 136 000 FCFA", "temporaires — peigne 41 000 + 7 000 de supplément + 700 FCFA × (101 à 120 locks) + déplacement 4 000");
   await page.getByRole("button", { name: "Modifier : Extensions" }).click();
   await page.waitForTimeout(500);
   await pick(page, /Je viens avec mes extensions/);
-  for (let i = 0; i < 3; i++) await next(page);
+  for (let i = 0; i < 2; i++) await next(page);
   check(norm(await page.getByTestId("total-estimatif").innerText()) === "19 000 FCFA", "temporaires — avec ses extensions : pose simple 15 000 + déplacement 4 000");
 
   await page.getByRole("button", { name: "Modifier : Type de projet" }).click();
@@ -349,10 +357,11 @@ for (const vp of [viewports[1], viewports[4]]) {
   await pickValue(page, "matiere", "naturelle");
   await pickValue(page, "longueur", "12");
   await page.getByRole("spinbutton", { name: "Nombre de mèches" }).fill("60");
-  for (let i = 0; i < 3; i++) await next(page);
+  for (let i = 0; i < 2; i++) await next(page);
   check((await page.getByLabel("Localité").count()) === 0, "achat — pas de frais de déplacement");
   check(norm(await page.getByTestId("total-estimatif").innerText()) === "42 000 FCFA", "achat — 60 mèches × 700 FCFA = 42 000 FCFA");
-  check(norm(await page.locator("main").innerText()).includes("700 FCFA × 60"), "achat — prix unitaire et quantité affichés");
+  await next(page);
+  check(norm(await page.locator("main").innerText()).includes("700 FCFA × 60"), "achat — prix unitaire et quantité affichés à l'étape Estimation");
   await context.close();
 }
 

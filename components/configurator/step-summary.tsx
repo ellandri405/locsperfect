@@ -45,12 +45,12 @@ interface Props {
   showErrors: boolean;
 }
 
-/** Étape 5 — Récapitulatif : chaque choix est modifiable ; la localité se choisit ici. */
+/** Étape 4 — Récapitulatif : chaque choix est modifiable ; la localité se choisit ici. */
 export function StepSummary({ draft, estimate, onChange, onEdit, showErrors }: Props) {
   const inspiration = getInspiration(draft.inspirationId);
   const rows: Array<{ id: FieldId | "projectType" | "inspiration"; label: string; value: string | null; pendingText: string }> = [
     ...summaryRows(draft).map((row) => ({ id: row.id, label: row.label, value: row.value, pendingText: row.required ? "À choisir" : "Non précisé" })),
-    { id: "inspiration", label: "Inspiration", value: inspiration?.title ?? null, pendingText: "Non choisie" },
+    { id: "inspiration", label: "Rendu choisi", value: inspiration?.title ?? null, pendingText: "Le plus proche de tes choix" },
   ];
   return (
     <div className="mt-8">
@@ -88,13 +88,18 @@ export function StepSummary({ draft, estimate, onChange, onEdit, showErrors }: P
         )}
       </div>
 
-      <h2 className="type-h3 mt-10 mb-4 !text-[1.375rem]">Estimation</h2>
-      <EstimateTable estimate={estimate} />
+      {/* Rappel du total : le détail est à l'étape suivante. */}
+      <div className="mt-8 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 rounded-card bg-mist p-5">
+        <p className="font-bold">Total estimatif</p>
+        <p data-testid="total-estimatif" className="type-h3 text-forest">
+          {estimate.totalLabel}
+        </p>
+      </div>
     </div>
   );
 }
 
-/** Étape 6 — Estimation détaillée. */
+/** Étape 5 — Estimation détaillée (suivie du formulaire d'envoi, voir configurator.tsx). */
 export function StepEstimate({ estimate }: { estimate: Estimate }) {
   return (
     <div className="mt-8">

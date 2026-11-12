@@ -31,7 +31,7 @@ const cta: Record<ProjectTypeId, string> = {
 
 const choices: Record<ProjectTypeId, string[]> = {
   depart: ["Sans ou avec extensions", "Technique", "Longueur", "Nombre de locks", "Finition"],
-  temporaire: ["Matière", "Longueur", "Couleur", "Texture", "Style"],
+  temporaire: ["Matière", "Longueur", "Couleur", "Texture", "Morphologie du visage"],
   achat: ["Matière", "Longueur", "Couleur", "Texture", "Quantité"],
 };
 

@@ -13,15 +13,15 @@ const axeSource = readFileSync(require.resolve("axe-core/axe.min.js"), "utf8");
 const BASE = process.env.BASE_URL ?? "http://localhost:3000";
 
 const draft = (step, patch = {}) => ({
-  version: 2, step, projectType: "depart", technique: "peigne-instantane", extensions: "avec", startQuantity: "101-120",
-  material: "naturelle", length: "20", color: "caramel", texture: null, thickness: "epaisse", style: null, strandQuantity: 50,
+  version: 3, step, projectType: "depart", technique: "peigne-instantane", extensions: "avec", startQuantity: "101-120",
+  material: "naturelle", length: "20", color: "caramel", texture: null, thickness: "epaisse", faceShape: "ovale", style: null, strandQuantity: 50,
   inspirationId: "longue-caramel", compareIds: [null, null], locality: "Koumassi", updatedAt: new Date().toISOString(), ...patch,
 });
 
 const targets = [
   ...["/", "/services", "/catalogue", "/galerie", "/care", "/care/entretien-des-locks", "/faq", "/contact", "/legal", "/design-system", "/page-inexistante"].map((path) => ({ name: path, path })),
   { name: "configurateur étape 1", path: "/my-locks-design" },
-  ...[1, 2, 3, 4, 5, 6].map((step) => ({ name: `configurateur étape ${step + 1}`, path: "/my-locks-design", draft: draft(step) })),
+  ...[1, 2, 3, 4].map((step) => ({ name: `configurateur étape ${step + 1}`, path: "/my-locks-design", draft: draft(step) })),
 ];
 
 const browser = await chromium.launch();

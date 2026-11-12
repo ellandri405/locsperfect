@@ -8,7 +8,7 @@ import {
   materialOptions,
   startQuantityOptions,
   strandQuantity,
-  styleOptions,
+  faceShapeOptions,
   textureOptions,
   thicknessOptions,
 } from "@/data/configurator";
@@ -171,8 +171,34 @@ export function StepCustomize({ draft, onChange, showErrors }: Props) {
             </div>
           </SelectorGroup>
         );
-      case "style":
-        return <ChipSelector name="style" legend="Style" hideLegend options={styleOptions} value={draft.style} onChange={(v) => onChange({ style: v })} />;
+      case "faceShape":
+        return (
+          <>
+            <SelectorGroup legend="Morphologie du visage" hideLegend>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {faceShapeOptions.map((option) => (
+                  <OptionCard
+                    key={option.id}
+                    name="morphologie"
+                    value={option.id}
+                    checked={draft.faceShape === option.id}
+                    onSelect={(v) => onChange({ faceShape: v })}
+                    title={option.label}
+                    description={option.description}
+                    media={
+                      <span aria-hidden className="absolute inset-0 grid place-items-center bg-mist">
+                        <FaceShapeIcon shape={option.id} />
+                      </span>
+                    }
+                  />
+                ))}
+              </div>
+            </SelectorGroup>
+            <p className="mt-3 text-sm text-charcoal">
+              Elle sert à te présenter, à l&apos;étape suivante, un rendu de face et de profil qui te ressemble.
+            </p>
+          </>
+        );
       case "strandQuantity": {
         const price = strandPrice(draft.material, draft.length);
         return (
@@ -201,6 +227,24 @@ export function StepCustomize({ draft, onChange, showErrors }: Props) {
         </FieldSection>
       ))}
     </div>
+  );
+}
+
+/** Contours schématiques des morphologies (repères visuels, pas des portraits). */
+const faceShapePaths: Record<string, string> = {
+  ovale: "M50 8C72 8 84 28 84 54C84 82 68 102 50 102C32 102 16 82 16 54C16 28 28 8 50 8Z",
+  rond: "M50 14C76 14 90 34 90 57C90 82 72 100 50 100C28 100 10 82 10 57C10 34 24 14 50 14Z",
+  carre: "M22 14H78C84 14 88 18 88 24V74C88 90 72 100 50 100C28 100 12 90 12 74V24C12 18 16 14 22 14Z",
+  coeur: "M50 12C78 12 92 26 90 46C88 70 66 102 50 102C34 102 12 70 10 46C8 26 22 12 50 12Z",
+  allonge: "M50 4C68 4 78 22 78 52C78 86 66 106 50 106C34 106 22 86 22 52C22 22 32 4 50 4Z",
+  losange: "M50 8C62 8 70 22 86 52C74 82 62 102 50 102C38 102 26 82 14 52C30 22 38 8 50 8Z",
+};
+
+function FaceShapeIcon({ shape }: { shape: string }) {
+  return (
+    <svg viewBox="0 0 100 110" className="h-[70%] w-auto">
+      <path d={faceShapePaths[shape] ?? faceShapePaths.ovale} fill="var(--lp-soft)" stroke="var(--lp-forest)" strokeWidth="2.5" strokeLinejoin="round" />
+    </svg>
   );
 }
 

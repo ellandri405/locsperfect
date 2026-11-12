@@ -61,7 +61,7 @@ const reassurance = [
   },
   {
     title: "Une personnalisation à la carte",
-    text: "Longueur, couleur, texture, épaisseur, style : tu composes ton projet étape par étape.",
+    text: "Longueur, couleur, texture, épaisseur, morphologie du visage : tu composes ton projet étape par étape.",
   },
   {
     title: "Un devis clair",

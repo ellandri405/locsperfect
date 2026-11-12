@@ -17,7 +17,7 @@ export function SummaryPanel({ draft, estimate, className, hideTitle }: SummaryP
   const inspiration = getInspiration(draft.inspirationId);
   const rows: Array<{ label: string; value: string | null; pendingText: string }> = [
     ...summaryRows(draft).map((row) => ({ label: row.label, value: row.value, pendingText: row.required ? "À choisir" : "Non précisé" })),
-    ...(draft.projectType ? [{ label: "Inspiration", value: inspiration?.title ?? null, pendingText: "Non choisie" }] : []),
+    ...(draft.projectType ? [{ label: "Rendu", value: inspiration?.title ?? null, pendingText: "Le plus proche de tes choix" }] : []),
     ...(needsLocality(draft) ? [{ label: "Localité", value: draft.locality, pendingText: "À choisir" }] : []),
   ];
   const savedAt = draft.updatedAt

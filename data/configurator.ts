@@ -4,11 +4,9 @@ import type { ColorOption, ConfigOption, ProjectType } from "@/types";
 export const configuratorSteps = [
   { id: "projet", label: "Projet" },
   { id: "personnalisation", label: "Personnalisation" },
-  { id: "inspirations", label: "Inspirations" },
-  { id: "comparer", label: "Comparer" },
+  { id: "rendu", label: "Rendu" },
   { id: "recapitulatif", label: "Récapitulatif" },
   { id: "estimation", label: "Estimation" },
-  { id: "envoi", label: "Envoi" },
 ] as const;
 
 /** Étape 1 — les trois types de projet et ce que chacun permet de personnaliser. */
@@ -25,7 +23,7 @@ export const projectTypes: ProjectType[] = [
       { id: "extensions", label: "Avec ou sans extensions", required: true },
       { id: "longueur", label: "Longueur" },
       { id: "epaisseur", label: "Épaisseur" },
-      { id: "style", label: "Style" },
+      { id: "morphologie", label: "Morphologie du visage" },
       { id: "matiere", label: "Matière, couleur et texture", note: "si extensions" },
     ],
     image: {
@@ -50,7 +48,7 @@ export const projectTypes: ProjectType[] = [
       { id: "couleur", label: "Couleur" },
       { id: "texture", label: "Texture" },
       { id: "epaisseur", label: "Épaisseur" },
-      { id: "style", label: "Style" },
+      { id: "morphologie", label: "Morphologie du visage" },
     ],
     image: {
       alt: "Inspiration de locks temporaires",
@@ -221,6 +219,20 @@ export const extensionOptions: ConfigOption[] = [
   },
 ];
 
+/**
+ * Morphologie du visage : sert à présenter un rendu de face et de profil adapté.
+ * Les descriptions sont des repères généraux pour aider la cliente à se reconnaître.
+ */
+export const faceShapeOptions: ConfigOption[] = [
+  { id: "ovale", label: "Ovale", description: "Un peu plus long que large, front et mâchoire équilibrés." },
+  { id: "rond", label: "Rond", description: "Aussi large que long, contours arrondis." },
+  { id: "carre", label: "Carré", description: "Front et mâchoire de même largeur, angles marqués." },
+  { id: "coeur", label: "Cœur", description: "Front plus large, menton fin." },
+  { id: "allonge", label: "Allongé", description: "Nettement plus long que large." },
+  { id: "losange", label: "Losange", description: "Pommettes larges, front et menton plus étroits." },
+];
+
+/** Styles : utilisés par la galerie et la bibliothèque d'inspirations (plus par le configurateur). */
 export const styleOptions: ConfigOption[] = [
   { id: "libres", label: "Locks libres" },
   { id: "attachees", label: "Locks attachées" },

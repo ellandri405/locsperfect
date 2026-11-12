@@ -118,6 +118,20 @@ Tous les autres tarifs restent « communiqués, à confirmer » et sont affiché
 - Adresse du site lue dans `NEXT_PUBLIC_SITE_URL`.
 - Comparateur avant / après : réservé à de vraies transformations LP LOCKS ; jamais d'image générée par IA.
 
+## Parcours MY LOCKS DESIGN en cinq étapes (12/11/2026)
+
+À la demande de LP LOCKS, le parcours passe de sept à cinq étapes :
+1. Projet — 2. Personnalisation — 3. Rendu (face et profil) — 4. Récapitulatif — 5. Estimation.
+
+- **Morphologie du visage** : remplace le choix du style à l'étape 2 (ovale, rond, carré, cœur, allongé, losange), facultative.
+- **Rendu** : remplace les étapes « Inspirations » et « Comparer ». Il présente le style le plus proche des choix, de face
+  et de profil, avec trois autres rendus proches. Aucune image n'est calculée ni retouchée : ce sont des visuels préparés
+  (`docs/VISUELS.md`). Sans image propre à la morphologie, le rendu générique est affiché et la cliente en est informée.
+- **Envoi du projet** (formulaire, PDF, WhatsApp) : n'est plus une étape à part, il se trouve sous l'estimation, à la
+  dernière étape. Choix fait pour que l'estimation reste la dernière étape sans perdre la transmission du projet.
+- Le comparateur de deux inspirations n'est plus affiché ; son code est conservé (`components/configurator/step-inspirations.tsx`).
+- Sauvegarde locale en version 3 : un projet enregistré avec l'ancien parcours est repris à l'étape équivalente.
+
 ## Fonctionnalités reportées
 
 Paiement en ligne, stocks, espace client, administration, prise de rendez-vous automatisée, simulation IA,

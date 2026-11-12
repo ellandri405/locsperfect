@@ -124,7 +124,7 @@ export async function generateProjectPdf({ draft, estimate, contact, now = new D
   y = heading("Choix de personnalisation", y);
   for (const item of summaryRows(draft)) y = row(item.label, item.value ?? "Non précisé", y);
   const inspiration = getInspiration(draft.inspirationId);
-  if (inspiration) y = row("Inspiration choisie", inspiration.title, y);
+  if (inspiration) y = row("Rendu choisi", inspiration.title, y);
   if (contact.comment.trim()) {
     y = fit(y, 16);
     write("Commentaire", M, y, 10.5);

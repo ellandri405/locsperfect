@@ -20,10 +20,10 @@ Le site est complet et testé. Il lui manque uniquement des contenus à fournir 
 - Mentions légales et confidentialité. Page 404 en français.
 - En-tête avec logo officiel et accès WhatsApp, menu mobile, pied de page.
 
-**MY LOCKS DESIGN** (sept étapes)
-1. Projet — 2. Personnalisation (champs adaptés au projet, obligatoires contrôlés, incompatibilités expliquées) —
-3. Inspirations classées selon les choix — 4. Comparateur de deux styles — 5. Récapitulatif modifiable et localité —
-6. Estimation détaillée — 7. Envoi (formulaire, photo facultative, PDF, WhatsApp).
+**MY LOCKS DESIGN** (cinq étapes)
+1. Projet — 2. Personnalisation (champs adaptés au projet, morphologie du visage, obligatoires contrôlés, incompatibilités
+expliquées) — 3. Rendu de face et de profil, avec autres rendus proches — 4. Récapitulatif modifiable et localité —
+5. Estimation détaillée, suivie de l'envoi (formulaire, photo facultative, PDF, WhatsApp).
 - Aperçu et récapitulatif synchronisés ; sauvegarde locale versionnée ; reprise à la même étape ; réinitialisation.
 - Le nom et le numéro de la cliente ne sont jamais enregistrés.
 
@@ -50,6 +50,9 @@ Le site est complet et testé. Il lui manque uniquement des contenus à fournir 
 
 ## Limites connues
 
+- **Rendu de face et de profil** : faute d'images, l'étape affiche deux emplacements « Photo à venir ». Le rendu
+  n'est pas calculé à partir des choix : c'est le visuel préparé le plus proche. La morphologie du visage ne change
+  l'image que si des vues propres à cette morphologie ont été fournies.
 - **Aucune photographie** : la visualisation du configurateur repose sur 18 emplacements de démonstration ;
   la galerie et le comparateur avant / après également. Les mécanismes sont fonctionnels et testés.
 - **Aucune image générée** : l'environnement de développement n'a ni outil de génération d'images ni accès
@@ -73,9 +76,9 @@ Tous exécutés et réussis sur la version finale :
 | `npm run lint` | aucune erreur |
 | `npm run typecheck` | aucune erreur |
 | `npm run build` | compilation réussie |
-| `npm test` | 58 tests unitaires |
-| `npm run test:visual` | 301 vérifications dans Chromium |
-| `npm run test:a11y` | aucun problème détecté par axe sur 36 écrans (18 vues × mobile et ordinateur) |
+| `npm test` | 61 tests unitaires |
+| `npm run test:visual` | 319 vérifications dans Chromium |
+| `npm run test:a11y` | aucun problème détecté par axe sur 32 écrans (16 vues × mobile et ordinateur) |
 
 **Tests unitaires** : chaque case de la grille tarifaire, sur devis au-delà de 120 locks, twists et peigne à tarif unique,
 prix à la mèche, extensions (fourchette, cas sur devis), zones de déplacement, acompte jamais ajouté, locks temporaires,

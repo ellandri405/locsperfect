@@ -1,11 +1,11 @@
 import {
   colorOptions,
   extensionOptions,
+  faceShapeOptions,
   lengthOptions,
   materialOptions,
   projectTypes,
   startQuantityOptions,
-  styleOptions,
   techniqueOptions,
   temporaryBaseOptions,
   temporaryExtensionOptions,
@@ -29,7 +29,7 @@ export type FieldId =
   | "color"
   | "texture"
   | "thickness"
-  | "style"
+  | "faceShape"
   | "strandQuantity";
 
 export interface FieldRule {
@@ -47,7 +47,7 @@ export const fieldLabels: Record<FieldId, string> = {
   color: "Couleur",
   texture: "Texture",
   thickness: "Épaisseur",
-  style: "Style",
+  faceShape: "Morphologie du visage",
   strandQuantity: "Nombre de mèches",
 };
 
@@ -65,14 +65,14 @@ export function fieldsFor(draft: ProjectDraft): FieldRule[] {
         // Sans extensions, la longueur est celle des cheveux : matière, longueur, couleur et texture ne s'appliquent pas.
         ...(withExtensions ? [rule("material", true), rule("length", true), rule("color"), rule("texture")] : []),
         rule("thickness"),
-        rule("style"),
+        rule("faceShape"),
       ];
     }
     case "temporaire": {
       // Les extensions sont obligatoires pour une pose temporaire : seule leur provenance se choisit.
       if (draft.extensions === "apportees") {
         // Pose simple à tarif unique : rien d'autre n'est nécessaire pour l'estimation.
-        return [{ ...rule("extensions", true), label: "Extensions" }, rule("length"), rule("color"), rule("texture"), rule("thickness"), rule("style")];
+        return [{ ...rule("extensions", true), label: "Extensions" }, rule("length"), rule("color"), rule("texture"), rule("thickness"), rule("faceShape")];
       }
       if (draft.extensions !== "fournies") return [{ ...rule("extensions", true), label: "Extensions" }];
       // La base et le nombre de locks fixent la main-d'œuvre ; le nombre de locks sert aussi
@@ -86,7 +86,7 @@ export function fieldsFor(draft: ProjectDraft): FieldRule[] {
         rule("color"),
         rule("texture"),
         rule("thickness"),
-        rule("style"),
+        rule("faceShape"),
       ];
     }
     case "achat":
@@ -135,7 +135,7 @@ const optionSets: Record<Exclude<FieldId, "strandQuantity">, { id: string; label
   color: colorOptions,
   texture: textureOptions,
   thickness: thicknessOptions,
-  style: styleOptions,
+  faceShape: faceShapeOptions,
 };
 
 /** Libellé lisible de la valeur d'un champ, null si non renseigné. */

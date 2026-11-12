@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { inspirations } from "@/data/inspirations";
 import { effectiveDraft, fieldsFor, lengthGroup, missingFields, summaryRows } from "@/lib/configurator";
-import { rankInspirations } from "@/lib/inspirations";
+import { rankInspirations, renderViews } from "@/lib/inspirations";
 import { EMPTY_DRAFT, parseDraft, STORAGE_VERSION, type ProjectDraft } from "@/lib/project-store";
 import { validateFutureDate, validateName, validatePhone } from "@/lib/validation";
 
@@ -10,7 +10,7 @@ const ids = (d: ProjectDraft) => fieldsFor(d).map((f) => f.id);
 
 describe("champs selon le projet", () => {
   it("départ sans extensions : pas de matière, longueur, couleur ni texture", () => {
-    expect(ids(draft({ projectType: "depart", extensions: "sans" }))).toEqual(["technique", "startQuantity", "extensions", "thickness", "style"]);
+    expect(ids(draft({ projectType: "depart", extensions: "sans" }))).toEqual(["technique", "startQuantity", "extensions", "thickness", "faceShape"]);
   });
   it("départ avec extensions : matière et longueur obligatoires", () => {
     const fields = fieldsFor(draft({ projectType: "depart", extensions: "avec" }));
@@ -26,7 +26,7 @@ describe("champs selon le projet", () => {
   it("locks temporaires avec ses propres extensions : ni base, ni matière, ni nombre de locks", () => {
     const d = draft({ projectType: "temporaire", extensions: "apportees" });
     expect(missingFields(d)).toEqual([]);
-    expect(ids(d)).toEqual(["extensions", "length", "color", "texture", "thickness", "style"]);
+    expect(ids(d)).toEqual(["extensions", "length", "color", "texture", "thickness", "faceShape"]);
     expect(summaryRows(d).find((r) => r.id === "extensions")?.value).toBe("Je viens avec mes extensions");
   });
   it("un choix d'extensions d'un autre projet est ignoré", () => {
@@ -54,6 +54,22 @@ describe("champs selon le projet", () => {
   });
 });
 
+describe("morphologie du visage et rendu", () => {
+  it("la morphologie remplace le style pour un départ et une pose, pas pour un achat", () => {
+    expect(ids(draft({ projectType: "depart", extensions: "sans" }))).toContain("faceShape");
+    expect(ids(draft({ projectType: "temporaire", extensions: "fournies" }))).toContain("faceShape");
+    expect(ids(draft({ projectType: "achat" }))).not.toContain("faceShape");
+    expect(summaryRows(draft({ projectType: "depart", extensions: "sans", faceShape: "coeur" })).find((r) => r.id === "faceShape")).toMatchObject({ label: "Morphologie du visage", value: "Cœur" });
+  });
+  it("vues de face et de profil : emplacement générique tant qu'aucune image propre à la morphologie n'existe", () => {
+    const views = renderViews(inspirations[0], "ovale");
+    expect(views.face.slot).toBe(`models/${inspirations[0].id}-face`);
+    expect(views.profil.slot).toBe(`models/${inspirations[0].id}-profil`);
+    expect(views.matchesFaceShape).toBe(false);
+    expect(renderViews(inspirations[0], null).face.alt).toContain("vue de face");
+  });
+});
+
 describe("inspirations", () => {
   it("regroupe les longueurs", () => {
     expect([lengthGroup("6"), lengthGroup("14"), lengthGroup("22"), lengthGroup("24-30"), lengthGroup(null)]).toEqual(["courte", "moyenne", "longue", "longue", null]);
@@ -64,9 +80,9 @@ describe("inspirations", () => {
     expect(first.exact).toBe(true);
   });
   it("signale une inspiration seulement proche quand la combinaison n'existe pas", () => {
-    const d = draft({ projectType: "temporaire", extensions: "fournies", length: "20", color: "caramel", texture: "frisee", thickness: "fine", style: "attachees" });
+    const d = draft({ projectType: "temporaire", extensions: "fournies", length: "20", color: "caramel", texture: "frisee", thickness: "fine" });
     const [first] = rankInspirations(d, inspirations);
-    const exact = inspirations.some((i) => i.lengthGroup === "longue" && i.color === "caramel" && i.texture === "frisee" && i.thickness === "fine" && i.styles.includes("attachees"));
+    const exact = inspirations.some((i) => i.lengthGroup === "longue" && i.color === "caramel" && i.texture === "frisee" && i.thickness === "fine");
     expect(first.exact).toBe(exact);
     if (!exact) expect(first.differences.length).toBeGreaterThan(0);
   });
@@ -81,8 +97,13 @@ describe("sauvegarde locale", () => {
     expect(d).toMatchObject({ version: STORAGE_VERSION, projectType: "temporaire", step: 0, material: null });
   });
   it("ignore les valeurs inconnues ou malformées", () => {
-    const d = parseDraft(JSON.stringify({ version: 2, projectType: "depart", technique: "inconnue", color: 42, step: 99, strandQuantity: -5, compareIds: "x" }));
-    expect(d).toMatchObject({ technique: null, color: null, step: 6, strandQuantity: 1, compareIds: [null, null] });
+    const d = parseDraft(JSON.stringify({ version: 3, projectType: "depart", technique: "inconnue", color: 42, faceShape: "triangle", step: 99, strandQuantity: -5, compareIds: "x" }));
+    expect(d).toMatchObject({ technique: null, color: null, faceShape: null, step: 4, strandQuantity: 1, compareIds: [null, null] });
+  });
+  it("migre un brouillon de version 2 : choix conservés, étapes renumérotées (7 → 5)", () => {
+    const v2 = (step: number) => parseDraft(JSON.stringify({ version: 2, step, projectType: "depart", technique: "twist", length: "12", style: "libres" }));
+    expect(v2(1)).toMatchObject({ version: STORAGE_VERSION, step: 1, technique: "twist", length: "12", faceShape: null });
+    expect([0, 1, 2, 3, 4, 5, 6].map((s) => v2(s).step)).toEqual([0, 1, 2, 2, 3, 4, 4]);
   });
   it("repart de zéro sur des données illisibles ou une version future", () => {
     expect(parseDraft("{pas du json")).toEqual(EMPTY_DRAFT);

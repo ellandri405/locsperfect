@@ -27,7 +27,7 @@ export const services: Service[] = [
     name: "Locks temporaires",
     shortName: "Locks temporaires",
     description:
-      "Porte des locks sans engagement durable. Matière, longueur, couleur, texture et style : tout se compose à la carte.",
+      "Porte des locks sans engagement durable. Matière, longueur, couleur et texture : tout se compose à la carte.",
     image: {
       alt: "Pose de locks temporaires réalisée par LP LOCKS",
       slot: "services/locks-temporaires",

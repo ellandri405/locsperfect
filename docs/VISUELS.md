@@ -102,6 +102,28 @@ car le configurateur s'en sert pour proposer l'inspiration la plus proche des ch
 
 Alterner modèles féminins et masculins sur la série.
 
+### Rendu de face et de profil (étape 3 de MY LOCKS DESIGN)
+
+L'étape « Rendu » présente le style retenu **vu de face et vu de profil**. Pour chaque inspiration du tableau ci-dessus,
+deux images portrait 3:4 sont attendues, avec le même modèle, la même coiffure et le même fond :
+
+| Emplacement | Vue |
+|---|---|
+| `models/{longueur}-{couleur}-face` | de face, regard caméra |
+| `models/{longueur}-{couleur}-profil` | de profil strict |
+
+Exemple : `models/longue-caramel-face` et `models/longue-caramel-profil`. Soit 36 images pour les 18 inspirations.
+
+**Selon la morphologie du visage** (facultatif) : pour montrer un rendu propre à une morphologie, ajouter des images nommées
+`rendus/{morphologie}-{longueur}-{couleur}-face` et `…-profil`, avec `ovale`, `rond`, `carre`, `coeur`, `allonge` ou `losange`.
+Exemple : `rendus/coeur-longue-caramel-face`. Quand ces deux images existent, elles remplacent les vues génériques pour
+cette morphologie ; sinon le site affiche les vues génériques et l'indique à la cliente.
+Couvrir toutes les combinaisons représente 216 images : commencer par les morphologies et les styles les plus demandés.
+
+Consigne à ajouter pour la vue de profil : `strict side profile view, same model, same hairstyle, same background`.
+Pour une morphologie : `oval face shape` / `round face shape` / `square face shape with defined jaw` /
+`heart-shaped face` / `long oblong face` / `diamond face shape with wide cheekbones`.
+
 ### Priorité 3 — galerie (12 images, portrait 4:5)
 
 | Emplacement | Sujet |

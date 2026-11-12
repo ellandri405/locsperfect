@@ -11,6 +11,7 @@ import { fieldValueLabel, missingFields, needsLocality, type FieldId } from "@/l
 import { rankInspirations } from "@/lib/inspirations";
 import { computeEstimate } from "@/lib/pricing";
 import { resetDraft, updateDraft, type ProjectDraft } from "@/lib/project-store";
+import { cn } from "@/lib/cn";
 import { Button } from "@/components/ui/button";
 import { MediaSlot } from "@/components/ui/media-slot";
 import { Modal } from "@/components/ui/modal";
@@ -18,27 +19,26 @@ import { ProgressSteps } from "@/components/ui/progress-steps";
 import { OptionCard, SelectorGroup } from "@/components/ui/selectors";
 import { useToast } from "@/components/ui/toast";
 import { StepCustomize } from "./step-customize";
-import { INDICATIVE_NOTICE, StepCompare, StepInspirations } from "./step-inspirations";
+import { INDICATIVE_NOTICE } from "./step-inspirations";
+import { StepRender } from "./step-render";
 import { StepSend } from "./step-send";
 import { StepEstimate, StepSummary } from "./step-summary";
 import { SummaryPanel } from "./summary-panel";
 
-const STEP = { project: 0, customize: 1, inspirations: 2, compare: 3, summary: 4, estimate: 5, send: 6 } as const;
+const STEP = { project: 0, customize: 1, render: 2, summary: 3, estimate: 4 } as const;
 
 const headings: Array<{ title: string; accent: string; lead: string }> = [
   { title: "Quel est", accent: "ton projet ?", lead: "Choisis ton point de départ. Les étapes suivantes s'adaptent à ton projet : tu ne verras que les options utiles." },
   { title: "Personnalise", accent: "tes locks.", lead: "Chaque choix met à jour ton aperçu, ton récapitulatif et ton estimation." },
-  { title: "Trouve", accent: "ton inspiration.", lead: "Les styles les plus proches de tes choix sont proposés en premier. Sélectionne celui qui te parle." },
-  { title: "Compare", accent: "deux styles.", lead: "Place deux inspirations côte à côte pour te décider." },
+  { title: "Le rendu", accent: "de tes choix.", lead: "De face et de profil : voici le style qui correspond à ta sélection." },
   { title: "Ton projet,", accent: "en un coup d'œil.", lead: "Vérifie tes choix. Chacun peut encore être modifié." },
   { title: "Ton", accent: "estimation.", lead: "Le détail de ce qui peut être chiffré dès maintenant." },
-  { title: "Envoie", accent: "ton projet.", lead: "LP LOCKS reçoit ton projet sur WhatsApp et te répond pour confirmer la disponibilité." },
 ];
 
 const emptyPreview: MediaRef = { alt: "Aperçu de ton projet", slot: "models/apercu-par-defaut", tone: "soft" };
 const ease = [0.22, 1, 0.36, 1] as const;
 
-/** MY LOCKS DESIGN — parcours complet en sept étapes. */
+/** MY LOCKS DESIGN — parcours complet en cinq étapes : projet, personnalisation, rendu, récapitulatif, estimation. */
 export function Configurator() {
   const draft = useProjectDraft();
   const { notify } = useToast();
@@ -92,12 +92,12 @@ export function Configurator() {
       if (missing.length > 0) return fail(`champ-${missing[0].id}`);
     }
     if (step === STEP.summary && needsLocality(draft) && !draft.locality) return fail("champ-locality");
-    goTo(Math.min(step + 1, STEP.send));
+    goTo(Math.min(step + 1, STEP.estimate));
   };
 
   const edit = (target: FieldId | "projectType" | "inspiration") => {
     if (target === "projectType") return goTo(STEP.project);
-    if (target === "inspiration") return goTo(STEP.inspirations);
+    if (target === "inspiration") return goTo(STEP.render);
     goTo(STEP.customize, target);
   };
 
@@ -115,27 +115,28 @@ export function Configurator() {
   const previewKey = inspiration?.id ?? project?.id ?? "vide";
   const previewBadge = inspiration
     ? chosen
-      ? "Inspiration choisie"
+      ? "Rendu choisi"
       : best?.exact
         ? "Correspond à tes choix"
-        : "Inspiration proche de tes choix"
+        : "Rendu proche de tes choix"
     : (project?.label ?? "Aperçu");
   const previewCaption = inspiration?.title ?? project?.tagline ?? "Choisis un projet pour commencer.";
-  const chips = (["length", "color", "texture", "thickness"] as FieldId[])
+  const chips = (["length", "color", "texture", "thickness", "faceShape"] as FieldId[])
     .map((id) => fieldValueLabel(draft, id))
     .filter((v): v is string => step !== STEP.project && Boolean(v));
 
   const heading = headings[step];
-  const continueLabel = step === STEP.estimate ? "Envoyer mon projet" : "Continuer";
+  const continueLabel = step === STEP.summary ? "Voir mon estimation" : "Continuer";
 
   return (
     <div className="lp-container pt-6 pb-32 lg:pt-10 lg:pb-24">
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-12 xl:gap-16">
         {/* Zone de visualisation + récapitulatif */}
-        <div className={step >= STEP.summary ? "hidden lg:block" : undefined}>
+        <div className={step >= STEP.summary || step === STEP.render ? "hidden lg:block" : undefined}>
           {/* Zone défilante sur ordinateur : focalisable pour pouvoir la parcourir au clavier. */}
           <div role="region" aria-label="Aperçu et récapitulatif du projet" tabIndex={0} className="rounded-panel lg:sticky lg:top-24 lg:max-h-[calc(100svh-7rem)] lg:overflow-y-auto lg:pr-1">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-panel sm:aspect-[16/10] lg:aspect-[5/4]">
+            {/* À l'étape « Rendu », les deux vues occupent le panneau principal : l'aperçu simple est masqué. */}
+            <div className={cn("relative aspect-[4/3] overflow-hidden rounded-panel sm:aspect-[16/10] lg:aspect-[5/4]", step === STEP.render && "hidden")}>
               <AnimatePresence initial={false}>
                 <motion.div
                   key={previewKey}
@@ -162,11 +163,11 @@ export function Configurator() {
                 {previewCaption}
               </p>
             </div>
-            <p className="mt-3 flex items-start gap-2 text-sm text-charcoal">
+            <p className={cn("mt-3 flex items-start gap-2 text-sm text-charcoal", step === STEP.render && "hidden")}>
               <Info aria-hidden className="mt-0.5 size-4 shrink-0" />
               {INDICATIVE_NOTICE}
             </p>
-            <SummaryPanel draft={draft} estimate={estimate} className="mt-5 hidden lg:block" />
+            <SummaryPanel draft={draft} estimate={estimate} className={cn("hidden lg:block", step !== STEP.render && "mt-5")} />
           </div>
         </div>
 
@@ -235,12 +236,19 @@ export function Configurator() {
                 </>
               )}
               {step === STEP.customize && <StepCustomize draft={draft} onChange={set} showErrors={showErrors} />}
-              {step === STEP.inspirations && <StepInspirations draft={draft} ranked={ranked} onChange={set} />}
-              {step === STEP.compare && <StepCompare draft={draft} ranked={ranked} onChange={set} />}
+              {step === STEP.render && <StepRender draft={draft} ranked={ranked} onChange={set} />}
               {step === STEP.summary && <StepSummary draft={draft} estimate={estimate} onChange={set} onEdit={edit} showErrors={showErrors} />}
-              {step === STEP.estimate && <StepEstimate estimate={estimate} />}
-              {step === STEP.send && (
-                <StepSend draft={draft} estimate={estimate} onChange={set} onEditChoices={() => goTo(STEP.summary)} onRestart={() => setConfirmReset(true)} />
+              {step === STEP.estimate && (
+                <>
+                  <StepEstimate estimate={estimate} />
+                  <h2 className="type-h2 mt-14">
+                    Envoie <em className="text-forest">ton projet.</em>
+                  </h2>
+                  <p className="mt-3 max-w-xl text-charcoal">
+                    LP LOCKS reçoit ton projet sur WhatsApp et te répond pour confirmer la disponibilité.
+                  </p>
+                  <StepSend draft={draft} estimate={estimate} onChange={set} onEditChoices={() => goTo(STEP.summary)} onRestart={() => setConfirmReset(true)} />
+                </>
               )}
             </motion.div>
           </AnimatePresence>
@@ -256,7 +264,7 @@ export function Configurator() {
                 Retour
               </Button>
             )}
-            {step < STEP.send && (
+            {step < STEP.estimate && (
               <Button size="lg" arrow onClick={next}>
                 {continueLabel}
               </Button>
@@ -286,7 +294,7 @@ export function Configurator() {
               <span className="block truncate text-sm font-bold">{project ? estimate.totalLabel : "À choisir"}</span>
             </span>
           </button>
-          {step < STEP.send && (
+          {step < STEP.estimate && (
             <Button arrow onClick={next}>
               {continueLabel}
             </Button>

@@ -68,7 +68,7 @@ docs/                Guide des visuels
 | Questions fréquentes | `data/faq.ts` |
 | Transformations avant / après | `data/before-after.ts` |
 | Mentions légales (éditeur, hébergeur) | `data/legal.ts` |
-| Types de projet, techniques, longueurs, couleurs, textures, matières, styles | `data/configurator.ts` |
+| Types de projet, techniques, longueurs, couleurs, textures, matières, morphologies du visage | `data/configurator.ts` |
 | Inspirations du configurateur | `data/inspirations.ts` |
 | Règles du parcours (champs affichés, obligatoires) | `lib/configurator.ts` |
 | Règles de calcul de l'estimation | `lib/pricing.ts` |

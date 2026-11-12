@@ -2,6 +2,7 @@ import type { ProjectTypeId } from "@/types";
 import {
   colorOptions,
   extensionOptions,
+  faceShapeOptions,
   lengthOptions,
   materialOptions,
   startQuantityOptions,
@@ -22,7 +23,7 @@ import {
  * une migration dans `parse`.
  */
 export const STORAGE_KEY = "lp-locks:projet";
-export const STORAGE_VERSION = 2;
+export const STORAGE_VERSION = 3;
 
 export interface ProjectDraft {
   version: number;
@@ -37,6 +38,9 @@ export interface ProjectDraft {
   color: string | null;
   texture: string | null;
   thickness: string | null;
+  /** Morphologie du visage. */
+  faceShape: string | null;
+  /** Ancien champ (versions 1 et 2), conservé pour compatibilité : n'est plus proposé. */
   style: string | null;
   /** Nombre de mèches (achat de locks). */
   strandQuantity: number;
@@ -59,6 +63,7 @@ export const EMPTY_DRAFT: ProjectDraft = {
   color: null,
   texture: null,
   thickness: null,
+  faceShape: null,
   style: null,
   strandQuantity: strandQuantity.initial,
   inspirationId: null,
@@ -68,7 +73,9 @@ export const EMPTY_DRAFT: ProjectDraft = {
 };
 
 const PROJECT_TYPES: ProjectTypeId[] = ["depart", "temporaire", "achat"];
-const LAST_STEP = 6;
+const LAST_STEP = 4;
+/** Correspondance des étapes de la version 2 (7 étapes) vers la version 3 (5 étapes). */
+const V2_STEPS = [0, 1, 2, 2, 3, 4, 4];
 
 const ids = (options: { id: string }[]) => options.map((o) => o.id);
 /** Valeurs autorisées par champ : toute valeur inconnue (ancienne option supprimée…) est ignorée. */
@@ -81,6 +88,7 @@ const allowed: Partial<Record<keyof ProjectDraft, string[]>> = {
   color: ids(colorOptions),
   texture: ids(textureOptions),
   thickness: ids(thicknessOptions),
+  faceShape: ids(faceShapeOptions),
   style: ids(styleOptions),
 };
 
@@ -99,7 +107,8 @@ function parse(raw: string | null): ProjectDraft {
       return { ...EMPTY_DRAFT, projectType, updatedAt: str(d.updatedAt) };
     }
     // Version inconnue (plus récente) : on repart d'un brouillon vide.
-    if (d.version !== STORAGE_VERSION) return EMPTY_DRAFT;
+    // La version 2 est lue comme la version 3 : seules les étapes sont renumérotées (voir plus bas).
+    if (d.version !== STORAGE_VERSION && d.version !== 2) return EMPTY_DRAFT;
 
     const draft: ProjectDraft = { ...EMPTY_DRAFT, projectType, updatedAt: str(d.updatedAt) };
     for (const [key, list] of Object.entries(allowed) as [keyof ProjectDraft, string[]][]) {
@@ -107,7 +116,8 @@ function parse(raw: string | null): ProjectDraft {
       if (value && list.includes(value)) (draft[key] as string) = value;
     }
     if (typeof d.step === "number" && Number.isInteger(d.step)) {
-      draft.step = projectType ? Math.min(LAST_STEP, Math.max(0, d.step)) : 0;
+      const step = d.version === 2 ? (V2_STEPS[Math.min(6, Math.max(0, d.step))] ?? 0) : d.step;
+      draft.step = projectType ? Math.min(LAST_STEP, Math.max(0, step)) : 0;
     }
     if (typeof d.strandQuantity === "number" && Number.isInteger(d.strandQuantity)) {
       draft.strandQuantity = Math.min(strandQuantity.max, Math.max(strandQuantity.min, d.strandQuantity));
