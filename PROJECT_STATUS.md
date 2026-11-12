@@ -56,8 +56,8 @@ Le site est complet et testé. Il lui manque uniquement des contenus à fournir 
   exploitable à une banque d'images.
 - **Liens WhatsApp** : le lien Business (`wa.me/message/…`) ne transporte pas de message prérempli. Il sert aux boutons
   de contact ; les envois de projet, de commande et de rendez-vous passent par le numéro pour transmettre les choix.
-- **Estimation des locks temporaires** : la main-d'œuvre utilise la même grille que le départ de locks, selon la base choisie.
-  Que les montants de base soient identiques pour les deux prestations est une déduction à confirmer par LP LOCKS.
+- **Départ de locks avec extensions** : la main-d'œuvre est comptée au tarif de la grille, plus le coût des extensions.
+  LP LOCKS n'a pas précisé si le supplément de la pose temporaire s'y applique aussi.
 - **Finition** du départ de locks : non proposée (liste d'options non communiquée).
 - **Photo d'inspiration de la cliente** : ni envoyée par le site ni ajoutée au PDF ; elle la joint elle-même dans WhatsApp.
 - **Catalogue** : couleur, texture et disponibilité non renseignées.
@@ -76,8 +76,8 @@ Tous exécutés et réussis sur la version finale :
 | `npm run lint` | aucune erreur |
 | `npm run typecheck` | aucune erreur |
 | `npm run build` | compilation réussie |
-| `npm test` | 53 tests unitaires |
-| `npm run test:visual` | 297 vérifications dans Chromium |
+| `npm test` | 58 tests unitaires |
+| `npm run test:visual` | 301 vérifications dans Chromium |
 | `npm run test:a11y` | aucun problème détecté par axe sur 36 écrans (18 vues × mobile et ordinateur) |
 
 **Tests unitaires** : chaque case de la grille tarifaire, sur devis au-delà de 120 locks, twists et peigne à tarif unique,

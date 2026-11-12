@@ -17,14 +17,24 @@ describe("champs selon le projet", () => {
     expect(fields.find((f) => f.id === "material")?.required).toBe(true);
     expect(fields.find((f) => f.id === "length")?.required).toBe(true);
   });
-  it("locks temporaires : base, matière, longueur et nombre de locks obligatoires, pas de choix d'extensions", () => {
-    const d = draft({ projectType: "temporaire" });
-    expect(ids(d)).not.toContain("extensions");
+  it("locks temporaires : provenance des extensions, puis base, matière, longueur et nombre de locks", () => {
+    expect(missingFields(draft({ projectType: "temporaire" })).map((f) => f.id)).toEqual(["extensions"]);
+    const d = draft({ projectType: "temporaire", extensions: "fournies" });
     expect(missingFields(d).map((f) => f.id)).toEqual(["technique", "material", "length", "startQuantity"]);
-    expect(fieldsFor(d)[0].label).toBe("Base de la pose");
+    expect(fieldsFor(d)[1].label).toBe("Base de la pose");
+  });
+  it("locks temporaires avec ses propres extensions : ni base, ni matière, ni nombre de locks", () => {
+    const d = draft({ projectType: "temporaire", extensions: "apportees" });
+    expect(missingFields(d)).toEqual([]);
+    expect(ids(d)).toEqual(["extensions", "length", "color", "texture", "thickness", "style"]);
+    expect(summaryRows(d).find((r) => r.id === "extensions")?.value).toBe("Je viens avec mes extensions");
+  });
+  it("un choix d'extensions d'un autre projet est ignoré", () => {
+    expect(missingFields(draft({ projectType: "temporaire", extensions: "sans" })).map((f) => f.id)).toEqual(["extensions"]);
+    expect(missingFields(draft({ projectType: "depart", extensions: "fournies", technique: "twist", startQuantity: "60-80" })).map((f) => f.id)).toEqual(["extensions"]);
   });
   it("locks temporaires : seules les bases crochet et peigne sont valables", () => {
-    const twist = draft({ projectType: "temporaire", technique: "twist", material: "naturelle", length: "12", startQuantity: "60-80" });
+    const twist = draft({ projectType: "temporaire", extensions: "fournies", technique: "twist", material: "naturelle", length: "12", startQuantity: "60-80" });
     expect(missingFields(twist).map((f) => f.id)).toEqual(["technique"]);
     const crochet = { ...twist, technique: "crochet-instantane" };
     expect(missingFields(crochet)).toEqual([]);
@@ -49,12 +59,12 @@ describe("inspirations", () => {
     expect([lengthGroup("6"), lengthGroup("14"), lengthGroup("22"), lengthGroup("24-30"), lengthGroup(null)]).toEqual(["courte", "moyenne", "longue", "longue", null]);
   });
   it("propose d'abord l'inspiration qui correspond à la longueur et à la couleur", () => {
-    const [first] = rankInspirations(draft({ projectType: "temporaire", length: "20", color: "caramel" }), inspirations);
+    const [first] = rankInspirations(draft({ projectType: "temporaire", extensions: "fournies", length: "20", color: "caramel" }), inspirations);
     expect(first.inspiration).toMatchObject({ lengthGroup: "longue", color: "caramel" });
     expect(first.exact).toBe(true);
   });
   it("signale une inspiration seulement proche quand la combinaison n'existe pas", () => {
-    const d = draft({ projectType: "temporaire", length: "20", color: "caramel", texture: "frisee", thickness: "fine", style: "attachees" });
+    const d = draft({ projectType: "temporaire", extensions: "fournies", length: "20", color: "caramel", texture: "frisee", thickness: "fine", style: "attachees" });
     const [first] = rankInspirations(d, inspirations);
     const exact = inspirations.some((i) => i.lengthGroup === "longue" && i.color === "caramel" && i.texture === "frisee" && i.thickness === "fine" && i.styles.includes("attachees"));
     expect(first.exact).toBe(exact);

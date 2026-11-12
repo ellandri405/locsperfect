@@ -8,6 +8,7 @@ import {
   styleOptions,
   techniqueOptions,
   temporaryBaseOptions,
+  temporaryExtensionOptions,
   textureOptions,
   thicknessOptions,
 } from "@/data/configurator";
@@ -67,11 +68,17 @@ export function fieldsFor(draft: ProjectDraft): FieldRule[] {
         rule("style"),
       ];
     }
-    case "temporaire":
-      // Les extensions sont obligatoires pour une pose temporaire : la matière l'est donc aussi.
-      // La base (crochet ou peigne) et le nombre de locks fixent la main-d'œuvre ; le nombre de locks sert aussi
+    case "temporaire": {
+      // Les extensions sont obligatoires pour une pose temporaire : seule leur provenance se choisit.
+      if (draft.extensions === "apportees") {
+        // Pose simple à tarif unique : rien d'autre n'est nécessaire pour l'estimation.
+        return [{ ...rule("extensions", true), label: "Extensions" }, rule("length"), rule("color"), rule("texture"), rule("thickness"), rule("style")];
+      }
+      if (draft.extensions !== "fournies") return [{ ...rule("extensions", true), label: "Extensions" }];
+      // La base et le nombre de locks fixent la main-d'œuvre ; le nombre de locks sert aussi
       // à chiffrer les extensions (prix à la mèche × nombre de locks).
       return [
+        { ...rule("extensions", true), label: "Extensions" },
         { ...rule("technique", true), label: "Base de la pose" },
         rule("material", true),
         rule("length", true),
@@ -81,6 +88,7 @@ export function fieldsFor(draft: ProjectDraft): FieldRule[] {
         rule("thickness"),
         rule("style"),
       ];
+    }
     case "achat":
       return [rule("material", true), rule("length", true), rule("strandQuantity", true), rule("color"), rule("texture")];
     default:
@@ -93,10 +101,17 @@ export function techniquesFor(projectType: ProjectDraft["projectType"]) {
   return projectType === "temporaire" ? temporaryBaseOptions : techniqueOptions;
 }
 
+/** Choix d'extensions selon le projet : avec / sans pour un départ, fournies / apportées pour une pose temporaire. */
+export function extensionChoicesFor(projectType: ProjectDraft["projectType"]) {
+  return projectType === "temporaire" ? temporaryExtensionOptions : extensionOptions;
+}
+
 /** Brouillon dont les champs non applicables au projet sont remis à vide (pour le résumé et le calcul). */
 export function effectiveDraft(draft: ProjectDraft): ProjectDraft {
-  const visible = new Set(fieldsFor(draft).map((f) => f.id));
   const clean = { ...draft };
+  // Un choix d'extensions fait pour un autre projet n'est pas valable ici.
+  if (clean.extensions && !extensionChoicesFor(clean.projectType).some((o) => o.id === clean.extensions)) clean.extensions = null;
+  const visible = new Set(fieldsFor(clean).map((f) => f.id));
   // Une technique choisie pour un autre projet (ex. twists) n'est pas valable pour une pose temporaire.
   if (clean.technique && !techniquesFor(clean.projectType).some((t) => t.id === clean.technique)) clean.technique = null;
   for (const id of Object.keys(fieldLabels) as FieldId[]) {
@@ -129,7 +144,7 @@ export function fieldValueLabel(rawDraft: ProjectDraft, id: FieldId): string | n
   const draft = effectiveDraft(rawDraft);
   const value = draft[id];
   if (!value) return null;
-  const options = id === "technique" ? techniquesFor(draft.projectType) : optionSets[id];
+  const options = id === "technique" ? techniquesFor(draft.projectType) : id === "extensions" ? extensionChoicesFor(draft.projectType) : optionSets[id];
   const option = options.find((o) => o.id === value);
   if (!option) return null;
   if (id === "length") return `${option.description} (${option.detail})`;
@@ -146,9 +161,10 @@ export interface SummaryRow {
 /** Lignes du récapitulatif : type de projet puis chaque champ applicable. */
 export function summaryRows(draft: ProjectDraft): SummaryRow[] {
   const project = projectTypes.find((p) => p.id === draft.projectType);
+  const clean = effectiveDraft(draft);
   return [
     { id: "projectType", label: "Type de projet", value: project?.label ?? null, required: true },
-    ...fieldsFor(draft).map((f) => ({ id: f.id, label: f.label, value: fieldValueLabel(draft, f.id), required: f.required })),
+    ...fieldsFor(clean).map((f) => ({ id: f.id, label: f.label, value: fieldValueLabel(draft, f.id), required: f.required })),
   ];
 }
 

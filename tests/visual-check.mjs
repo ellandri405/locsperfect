@@ -141,7 +141,7 @@ for (const vp of [viewports[1], viewports[4]]) {
     check((await recapText(page, vp)).includes(label), `${tag} — « ${label} » sélectionnable, récapitulatif synchronisé`);
   }
   check(await page.getByText("La pose de locks temporaires nécessite des extensions.").isVisible(), `${tag} — mention obligatoire sur les extensions`);
-  const adapted = page.locator("li", { hasText: /Matière\s*·\s*obligatoire/ });
+  const adapted = page.locator("li", { hasText: /Extensions fournies ou apportées\s*·\s*obligatoire/ });
   check((await adapted.count()) === 1 && (await adapted.isVisible()), `${tag} — options adaptées au projet`);
 
   await page.reload({ waitUntil: "networkidle" });
@@ -303,10 +303,14 @@ for (const vp of [viewports[1], viewports[4]]) {
   await page.goto(BASE + "/my-locks-design", { waitUntil: "networkidle" });
   await pick(page, /Locks temporaires/);
   await next(page);
-  check((await page.getByRole("heading", { level: 2, name: "Base de la pose" }).count()) === 1 && (await page.getByRole("heading", { level: 2, name: "Extensions" }).count()) === 0, "temporaires — choix de la base, pas de choix d'extensions");
+  check((await page.locator("main section[id^=champ-]").count()) === 1 && (await page.getByText("La pose de locks temporaires nécessite des extensions.").first().isVisible()), "temporaires — d'abord la provenance des extensions (obligatoires)");
+  await pick(page, /Je viens avec mes extensions/);
+  check((await page.getByRole("heading", { level: 2, name: "Base de la pose" }).count()) === 0 && (await page.getByRole("heading", { level: 2, name: "Matière" }).count()) === 0, "temporaires — extensions apportées : ni base ni matière à choisir");
+  check(norm(await recapText(page, viewports[4])).includes("15 000 FCFA"), "temporaires — pose simple à 15 000 FCFA");
+  await pick(page, /Extensions fournies par LP LOCKS/);
+  check((await page.getByRole("heading", { level: 2, name: "Base de la pose" }).count()) === 1, "temporaires — extensions fournies : choix de la base");
   check((await page.locator('input[name="technique"]').count()) === 2, "temporaires — deux bases proposées (crochet, peigne)");
   await pick(page, /Base au crochet/);
-  check(await page.getByText(/nécessite des extensions : choisis leur matière/).isVisible(), "temporaires — extensions obligatoires rappelées");
   await pick(page, /^Synthétique/);
   await pick(page, /24 à 30 pouces/);
   check(await page.getByText("De 24 à 30 pouces, le tarif est sur devis.").isVisible(), "temporaires — longueur sur devis identifiée");
@@ -316,21 +320,26 @@ for (const vp of [viewports[1], viewports[4]]) {
   for (let i = 0; i < 3; i++) await next(page);
   await page.getByLabel("Localité").selectOption("Yopougon");
   check(norm(await page.locator("#champ-locality").innerText()).includes("Zone 5 — frais de déplacement sur devis"), "temporaires — zone 5 : frais sur devis");
-  check(norm(await page.getByTestId("total-estimatif").innerText()) === "À partir de 25 000 FCFA", "temporaires — pose 25 000 FCFA ; extensions et déplacement sur devis, non additionnés");
+  check(norm(await page.getByTestId("total-estimatif").innerText()) === "À partir de 30 000 FCFA", "temporaires — pose 25 000 + 5 000 de supplément ; extensions et déplacement sur devis, non additionnés");
   // Longueur chiffrable : extensions synthétiques = 100 FCFA × 60 à 80 locks, en « à partir de ».
   await page.getByRole("button", { name: "Modifier : Longueur" }).click();
   await page.waitForTimeout(500);
   await pickValue(page, "longueur", "12");
   for (let i = 0; i < 3; i++) await next(page);
   await page.getByLabel("Localité").selectOption("Riviera 2");
-  check(norm(await page.getByTestId("total-estimatif").innerText()) === "À partir de 35 000 FCFA", "temporaires — pose 25 000 + extensions 100 FCFA × 60 locks + déplacement 4 000");
+  check(norm(await page.getByTestId("total-estimatif").innerText()) === "À partir de 40 000 FCFA", "temporaires — pose 30 000 + extensions 100 FCFA × 60 locks + déplacement 4 000");
   await page.getByRole("button", { name: "Modifier : Base de la pose" }).click();
   await page.waitForTimeout(500);
   await pick(page, /Base au peigne/);
   await pick(page, /101 à 120 locks/);
   await pickValue(page, "matiere", "naturelle");
   for (let i = 0; i < 3; i++) await next(page);
-  check(norm(await page.getByTestId("total-estimatif").innerText()) === "De 115 700 à 129 000 FCFA", "temporaires — peigne 41 000 + 700 FCFA × (101 à 120 locks) + déplacement 4 000");
+  check(norm(await page.getByTestId("total-estimatif").innerText()) === "De 122 700 à 136 000 FCFA", "temporaires — peigne 41 000 + 7 000 de supplément + 700 FCFA × (101 à 120 locks) + déplacement 4 000");
+  await page.getByRole("button", { name: "Modifier : Extensions" }).click();
+  await page.waitForTimeout(500);
+  await pick(page, /Je viens avec mes extensions/);
+  for (let i = 0; i < 3; i++) await next(page);
+  check(norm(await page.getByTestId("total-estimatif").innerText()) === "19 000 FCFA", "temporaires — avec ses extensions : pose simple 15 000 + déplacement 4 000");
 
   await page.getByRole("button", { name: "Modifier : Type de projet" }).click();
   await page.waitForTimeout(500);
@@ -378,7 +387,8 @@ for (const vp of [viewports[1], viewports[4]]) {
   check(rows[0] === "Instantané au crochet 25 000 FCFA 30 000 FCFA 35 000 FCFA", `services — grille crochet (${rows[0]})`);
   check(rows[1] === "Instantané base peigne 27 000 FCFA 34 000 FCFA 41 000 FCFA", `services — grille base peigne (${rows[1]})`);
   const tempRows = (await page.locator("#temporaire table tbody tr").allInnerTexts()).map((t) => norm(t).replace(/\s+/g, " "));
-  check(tempRows[0] === "Base au crochet 25 000 FCFA 30 000 FCFA 35 000 FCFA" && tempRows[1] === "Base au peigne 27 000 FCFA 34 000 FCFA 41 000 FCFA", "services — même grille pour la pose de locks temporaires");
+  check(tempRows[0] === "Base au crochet 30 000 FCFA 35 000 FCFA 40 000 FCFA" && tempRows[1] === "Base au peigne 34 000 FCFA 41 000 FCFA 48 000 FCFA", `services — pose temporaire : grille + supplément (${tempRows.join(" | ")})`);
+  check(norm(await page.locator("#temporaire").innerText()).replace(/\s+/g, " ").includes("tu viens avec tes extensions 15 000 FCFA"), "services — pose simple à 15 000 FCFA, validée");
   check(await page.locator("#depart").getByText("Au-delà de 120 locks : sur devis.", { exact: true }).isVisible(), "services — au-delà de 120 locks : sur devis");
   const zones = norm(await page.locator("#deplacement").innerText());
   check(/Zone 3\s+5 000 FCFA/.test(zones) && /Zone 4\s+6 000 FCFA/.test(zones) && /Zone 5\s+Sur devis/.test(zones), "services — zones 3 (5 000), 4 (6 000) et 5 (sur devis)");

@@ -55,10 +55,6 @@ export const syntheticLockPrice: Price = {
  * GRILLE DÉPART DE LOCKS — confirmée par LP LOCKS le 11/11/2026.
  * Prix en FCFA selon la technique et le nombre de locks. Au-delà de 120 locks : sur devis.
  * (« Départ simple à partir de 25 000 » = instantané au crochet, première tranche.)
- *
- * Précision du 12/11/2026 : cette grille vaut aussi pour la MAIN-D'ŒUVRE DE LA POSE DE LOCKS TEMPORAIRES
- * (base au crochet ou base au peigne). Le tarif augmente par tranche de vingt locks :
- * +5 000 FCFA (crochet) ou +7 000 FCFA (peigne).
  */
 export const startQuantityTiers = [
   { id: "60-80", label: "60 à 80 locks", min: 60, max: 80 },
@@ -71,6 +67,26 @@ export type StartTierId = (typeof startQuantityTiers)[number]["id"];
 export const startPriceGrid: Record<string, Record<StartTierId, number>> = {
   "crochet-instantane": { "60-80": 25000, "81-100": 30000, "101-120": 35000 },
   "peigne-instantane": { "60-80": 27000, "81-100": 34000, "101-120": 41000 },
+};
+
+/**
+ * POSE DE LOCKS TEMPORAIRES — confirmé par LP LOCKS le 12/11/2026.
+ * Main-d'œuvre = grille du départ de locks + supplément selon la base.
+ * Les extensions fournies par LP LOCKS s'ajoutent (prix à la mèche × nombre de locks).
+ */
+export const temporaryPoseSupplement: Record<string, number> = {
+  "crochet-instantane": 5000,
+  "peigne-instantane": 7000,
+};
+
+/** Pose simple : pour la cliente qui vient avec ses propres extensions (confirmé le 12/11/2026). */
+export const ownExtensionsPose: Price = {
+  id: "pose-simple-extensions",
+  label: "Pose simple — tu viens avec tes extensions",
+  amount: 15000,
+  unit: "prestation",
+  conditions: "Pour la cliente qui apporte ses propres extensions.",
+  status: "valide",
 };
 
 /**
@@ -98,7 +114,6 @@ export const flatStartPrices: Price[] = [
 
 /** Autres prestations communiquées. Conditions d'application à préciser par LP LOCKS. */
 export const servicePrices: Price[] = [
-  { id: "pose-simple-extensions", label: "Pose simple avec extensions", amount: 15000 },
   { id: "reprise-crochet", label: "Reprise au crochet", amount: 15000 },
   { id: "reprise-twist", label: "Reprise au twist", amount: 17000 },
   { id: "reprise-complete", label: "Reprise complète", amount: 20000, from: true },
@@ -122,6 +137,7 @@ export const allPrices: Price[] = [
   naturalLockQuoteOnly,
   syntheticLockPrice,
   ...flatStartPrices,
+  ownExtensionsPose,
   ...servicePrices,
   depositReference,
 ];

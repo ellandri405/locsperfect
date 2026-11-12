@@ -8,6 +8,7 @@ import {
   strandQuantity,
   styleOptions,
   techniqueOptions,
+  temporaryExtensionOptions,
   textureOptions,
   thicknessOptions,
 } from "@/data/configurator";
@@ -73,7 +74,7 @@ const ids = (options: { id: string }[]) => options.map((o) => o.id);
 /** Valeurs autorisées par champ : toute valeur inconnue (ancienne option supprimée…) est ignorée. */
 const allowed: Partial<Record<keyof ProjectDraft, string[]>> = {
   technique: ids(techniqueOptions),
-  extensions: ids(extensionOptions),
+  extensions: [...ids(extensionOptions), ...ids(temporaryExtensionOptions)],
   startQuantity: ids(startQuantityOptions),
   material: ids(materialOptions),
   length: ids(lengthOptions),

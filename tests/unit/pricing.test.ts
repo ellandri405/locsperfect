@@ -120,24 +120,25 @@ describe("estimation — départ de locks", () => {
 });
 
 describe("estimation — locks temporaires", () => {
-  const temp = { projectType: "temporaire" as const, material: "naturelle", length: "12", locality: "Riviera 2" };
+  const temp = { projectType: "temporaire" as const, extensions: "fournies", material: "naturelle", length: "12", locality: "Riviera 2" };
 
+  // Grille du départ de locks + 5 000 (base crochet) ou + 7 000 (base peigne).
   it.each([
-    ["crochet-instantane", "60-80", 25000],
-    ["crochet-instantane", "81-100", 30000],
-    ["crochet-instantane", "101-120", 35000],
-    ["peigne-instantane", "60-80", 27000],
-    ["peigne-instantane", "81-100", 34000],
-    ["peigne-instantane", "101-120", 41000],
-  ])("main-d'œuvre : même grille que le départ — %s, %s locks → %i FCFA", (technique, startQuantity, amount) => {
+    ["crochet-instantane", "60-80", 30000],
+    ["crochet-instantane", "81-100", 35000],
+    ["crochet-instantane", "101-120", 40000],
+    ["peigne-instantane", "60-80", 34000],
+    ["peigne-instantane", "81-100", 41000],
+    ["peigne-instantane", "101-120", 48000],
+  ])("main-d'œuvre : grille + supplément — %s, %s locks → %i FCFA", (technique, startQuantity, amount) => {
     const e = computeEstimate(draft({ ...temp, technique, startQuantity }));
     expect(e.lines[0]).toMatchObject({ id: "pose", amount, confirmed: true });
   });
 
   it("total complet : pose + extensions (fourchette) + déplacement", () => {
-    // 30 000 (crochet, 81–100) + 700 × (81 à 100) + 4 000 (zone 2)
+    // 35 000 (crochet, 81–100, supplément compris) + 700 × (81 à 100) + 4 000 (zone 2)
     const e = computeEstimate(draft({ ...temp, technique: "crochet-instantane", startQuantity: "81-100" }));
-    expect([e.knownTotal, e.knownTotalMax]).toEqual([90700, 104000]);
+    expect([e.knownTotal, e.knownTotalMax]).toEqual([95700, 109000]);
     expect(e.hasPending).toBe(false);
     expect(e.allConfirmed).toBe(false); // la zone 2 reste « à confirmer »
   });
@@ -156,8 +157,25 @@ describe("estimation — locks temporaires", () => {
   it("extensions synthétiques : minimum × nombre de locks, en « à partir de »", () => {
     const e = computeEstimate(draft({ ...temp, material: "synthetique", technique: "crochet-instantane", startQuantity: "60-80" }));
     expect(e.lines.find((l) => l.id === "extensions")).toMatchObject({ amount: 6000, from: true });
-    expect(e.knownTotal).toBe(35000);
+    expect(e.knownTotal).toBe(40000);
     expect(e.totalLabel).toMatch(/^À partir de/);
+  });
+
+  it("pose simple : la cliente vient avec ses extensions → 15 000 FCFA, sans coût d'extensions", () => {
+    const e = computeEstimate(draft({ ...temp, extensions: "apportees", technique: "peigne-instantane", startQuantity: "101-120" }));
+    expect(e.lines).toHaveLength(1);
+    expect(e.lines[0]).toMatchObject({ id: "pose", amount: 15000, confirmed: true });
+    expect([e.knownTotal, e.knownTotalMax]).toEqual([19000, 19000]);
+  });
+
+  it("le supplément ne s'applique pas au départ de locks", () => {
+    const e = computeEstimate(draft({ projectType: "depart", technique: "peigne-instantane", startQuantity: "60-80", extensions: "sans", locality: "Angré" }));
+    expect(e.lines[0].amount).toBe(27000);
+  });
+
+  it("provenance des extensions non choisie : rien n'est chiffré", () => {
+    const e = computeEstimate(draft({ projectType: "temporaire", locality: "Riviera 2" }));
+    expect(e.lines[0]).toMatchObject({ amount: null, pendingText: "Extensions à choisir" });
   });
 });
 

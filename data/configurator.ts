@@ -42,10 +42,11 @@ export const projectTypes: ProjectType[] = [
       "Pour porter des locks sans engagement durable et changer de style quand tu le souhaites.",
     notice: "La pose de locks temporaires nécessite des extensions.",
     customizations: [
-      { id: "technique", label: "Base de la pose", required: true },
-      { id: "matiere", label: "Matière", required: true },
-      { id: "longueur", label: "Longueur", required: true },
-      { id: "quantite", label: "Nombre de locks", required: true },
+      { id: "extensions", label: "Extensions fournies ou apportées", required: true },
+      { id: "technique", label: "Base de la pose", note: "si extensions fournies" },
+      { id: "matiere", label: "Matière", note: "si extensions fournies" },
+      { id: "longueur", label: "Longueur" },
+      { id: "quantite", label: "Nombre de locks" },
       { id: "couleur", label: "Couleur" },
       { id: "texture", label: "Texture" },
       { id: "epaisseur", label: "Épaisseur" },
@@ -191,6 +192,20 @@ export const techniqueOptions: ConfigOption[] = [
 export const temporaryBaseOptions: ConfigOption[] = [
   { id: "crochet-instantane", label: "Base au crochet", description: "Pose réalisée sur une base au crochet." },
   { id: "peigne-instantane", label: "Base au peigne", description: "Pose réalisée sur une base au peigne." },
+];
+
+/** Pose temporaire : qui fournit les extensions (elles sont obligatoires pour cette prestation). */
+export const temporaryExtensionOptions: ConfigOption[] = [
+  {
+    id: "fournies",
+    label: "Extensions fournies par LP LOCKS",
+    description: "Tu choisis la matière, la longueur et la couleur. Elles s'ajoutent au prix de la pose.",
+  },
+  {
+    id: "apportees",
+    label: "Je viens avec mes extensions",
+    description: "Pose simple, réalisée avec les extensions que tu apportes.",
+  },
 ];
 
 export const extensionOptions: ConfigOption[] = [

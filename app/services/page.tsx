@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Info } from "lucide-react";
 import type { Price, ProjectTypeId } from "@/types";
 import { services } from "@/data/services";
-import { depositReference, getPrice, servicePrices, startPriceGrid, startQuantityTiers } from "@/data/prices";
+import { depositReference, getPrice, servicePrices, startPriceGrid, startQuantityTiers, temporaryPoseSupplement } from "@/data/prices";
 import { travelZones } from "@/data/locations";
 import type { ConfigOption } from "@/types";
 import { materialOptions, techniqueOptions, temporaryBaseOptions } from "@/data/configurator";
@@ -116,12 +116,17 @@ export default function ServicesPage() {
                   )}
 
                   <h3 className="mt-8 mb-3 text-sm font-bold">Tarifs</h3>
-                  {service.id !== "achat" && <StartPriceTable name={service.name} labels={service.id === "temporaire" ? temporaryBaseOptions : techniqueOptions} />}
+                  {service.id !== "achat" && <StartPriceTable
+                      name={service.name}
+                      labels={service.id === "temporaire" ? temporaryBaseOptions : techniqueOptions}
+                      supplement={service.id === "temporaire" ? temporaryPoseSupplement : undefined}
+                    />}
                   <PriceList prices={prices} />
                   {service.id === "temporaire" && (
                     <p className="mt-3 text-sm leading-relaxed text-charcoal">
-                      La main-d&apos;œuvre suit la même grille que le départ de locks, selon la base (crochet ou peigne). Les
-                      extensions s&apos;ajoutent : prix de la mèche multiplié par le nombre de locks.
+                      Tarifs de la pose selon la base et le nombre de locks. Les extensions fournies par LP LOCKS
+                      s&apos;ajoutent : prix de la mèche multiplié par le nombre de locks. Tu viens avec tes extensions ? C&apos;est
+                      la pose simple, à tarif unique.
                     </p>
                   )}
                   {service.id === "achat" && (
@@ -221,7 +226,7 @@ function StartProjectButtonSecondary() {
 }
 
 /** Grille du départ de locks : technique × nombre de locks. */
-function StartPriceTable({ labels, name }: { labels: ConfigOption[]; name: string }) {
+function StartPriceTable({ labels, name, supplement }: { labels: ConfigOption[]; name: string; supplement?: Record<string, number> }) {
   return (
     <div className="mb-4">
       <div role="region" aria-label={`Grille tarifaire — ${name}`} tabIndex={0} className="-mx-5 overflow-x-auto px-5 md:mx-0 md:px-0">
@@ -230,7 +235,7 @@ function StartPriceTable({ labels, name }: { labels: ConfigOption[]; name: strin
           <thead>
             <tr className="border-b border-ink/20 text-sm">
               <th scope="col" className="py-3 pr-4 font-semibold text-charcoal">
-                Technique
+                {supplement ? "Base" : "Technique"}
               </th>
               {startQuantityTiers.map((tier) => (
                 <th key={tier.id} scope="col" className="px-2 py-3 text-right font-semibold whitespace-nowrap text-charcoal">
@@ -247,7 +252,7 @@ function StartPriceTable({ labels, name }: { labels: ConfigOption[]; name: strin
                 </th>
                 {startQuantityTiers.map((tier) => (
                   <td key={tier.id} className="px-2 py-3.5 text-right font-bold whitespace-nowrap">
-                    {formatFcfa(row[tier.id])}
+                    {formatFcfa(row[tier.id] + (supplement?.[technique] ?? 0))}
                   </td>
                 ))}
               </tr>

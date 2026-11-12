@@ -4,7 +4,6 @@ import { Info } from "lucide-react";
 import type { ReactNode } from "react";
 import {
   colorOptions,
-  extensionOptions,
   lengthOptions,
   materialOptions,
   startQuantityOptions,
@@ -13,8 +12,9 @@ import {
   textureOptions,
   thicknessOptions,
 } from "@/data/configurator";
-import { fieldsFor, techniquesFor, type FieldId, type FieldRule } from "@/lib/configurator";
+import { extensionChoicesFor, fieldsFor, techniquesFor, type FieldId, type FieldRule } from "@/lib/configurator";
 import { formatFcfa } from "@/lib/format";
+import { ownExtensionsPose, temporaryPoseSupplement } from "@/data/prices";
 import { lineAmountLabel, materialPriceHint, startPrice, strandPrice } from "@/lib/pricing";
 import type { ProjectDraft } from "@/lib/project-store";
 import { cn } from "@/lib/cn";
@@ -51,7 +51,9 @@ export function StepCustomize({ draft, onChange, showErrors }: Props) {
         return (
           <div className="grid gap-3 sm:grid-cols-2">
             {techniquesFor(draft.projectType).map((option) => {
-              const price = startPrice(option.id, draft.startQuantity);
+              const supplement = draft.projectType === "temporaire" ? (temporaryPoseSupplement[option.id] ?? 0) : 0;
+              const start = startPrice(option.id, draft.startQuantity);
+              const price = start && start.amount !== null ? { ...start, amount: start.amount + supplement } : start;
               return (
                 <OptionCard
                   key={option.id}
@@ -85,7 +87,7 @@ export function StepCustomize({ draft, onChange, showErrors }: Props) {
         return (
           <>
             <div className="grid gap-3 sm:grid-cols-2">
-              {extensionOptions.map((option) => (
+              {extensionChoicesFor(draft.projectType).map((option) => (
                 <OptionCard
                   key={option.id}
                   name="extensions"
@@ -97,7 +99,13 @@ export function StepCustomize({ draft, onChange, showErrors }: Props) {
                 />
               ))}
             </div>
-            {draft.extensions === "sans" && (
+            {draft.projectType === "temporaire" && (
+              <Note>
+                La pose de locks temporaires nécessite des extensions.
+                {draft.extensions === "apportees" && ownExtensionsPose.amount !== null && ` Pose simple : ${formatFcfa(ownExtensionsPose.amount)}.`}
+              </Note>
+            )}
+            {draft.projectType === "depart" && draft.extensions === "sans" && (
               <Note>Sans extensions, la longueur est celle de tes cheveux : la matière, la longueur et la couleur ne sont pas à choisir.</Note>
             )}
           </>
@@ -118,7 +126,7 @@ export function StepCustomize({ draft, onChange, showErrors }: Props) {
                 />
               ))}
             </div>
-            {draft.projectType === "temporaire" && <Note>La pose de locks temporaires nécessite des extensions : choisis leur matière.</Note>}
+
           </>
         );
       case "length":
