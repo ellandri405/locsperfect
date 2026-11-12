@@ -62,7 +62,6 @@ Le site est complet et testé. Il lui manque uniquement des contenus à fournir 
 - **Logo** fourni en JPEG : un fichier vectoriel (SVG) serait préférable.
 - **Adresse d'article inconnue** : la page « introuvable » s'affiche (non indexable) mais répond 200 à la première visite,
   puis 404 (fonctionnement du cache de Next.js 16).
-- **Catalogue** : performance mobile mesurée à 91 (affichage principal à 3,0 s en réseau lent simulé), contre 98 à 100 ailleurs.
 - Le site de référence seed.com n'a pas pu être consulté depuis l'environnement de développement.
 
 ## Tests réalisés (12 novembre 2026)
@@ -103,12 +102,15 @@ validation des formulaires, liens WhatsApp.
 
 | Page | Performance | Accessibilité | Bonnes pratiques | Référencement |
 |---|---:|---:|---:|---:|
-| Accueil | 98 | 100 | 100 | 100 |
-| MY LOCKS DESIGN | 100 | 100 | 100 | 100 |
-| Nos services | 99 | 100 | 100 | 100 |
-| Catalogue | 91 | 100 | 100 | 100 |
-| Galerie | 98 | 100 | 100 | 100 |
+| Accueil | 93 | 100 | 100 | 100 |
+| MY LOCKS DESIGN | 96 | 100 | 100 | 100 |
+| Nos services | 95 | 100 | 100 | 100 |
+| Catalogue | 97 | 100 | 100 | 100 |
+| Galerie | 95 | 100 | 100 | 100 |
 | Contact | 99 | 100 | 100 | 100 |
+
+Mesure du rendu final. La note de performance varie de quelques points d'une mesure à l'autre
+(une mesure précédente donnait entre 91 et 100 selon les pages).
 
 Ces mesures ont été faites sans photographies : elles devront être refaites une fois les visuels intégrés
 (images en WebP, moins de 400 Ko, comme indiqué dans `docs/VISUELS.md`).
