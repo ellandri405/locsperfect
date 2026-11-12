@@ -27,7 +27,7 @@ interface Props {
 }
 
 /**
- * Étape 7 — Envoi. Les coordonnées restent dans cette page : elles ne sont ni
+ * Envoi du projet (affiché sous l'estimation, à la dernière étape). Les coordonnées restent dans cette page : elles ne sont ni
  * enregistrées sur l'appareil ni transmises par le site.
  */
 export function StepSend({ draft, estimate, onChange, onEditChoices, onRestart }: Props) {

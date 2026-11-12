@@ -81,21 +81,24 @@ Tous exécutés et réussis sur la version finale :
 | `npm run test:a11y` | aucun problème détecté par axe sur 32 écrans (16 vues × mobile et ordinateur) |
 
 **Tests unitaires** : chaque case de la grille tarifaire, sur devis au-delà de 120 locks, twists et peigne à tarif unique,
-prix à la mèche, extensions (fourchette, cas sur devis), zones de déplacement, acompte jamais ajouté, locks temporaires,
-achat (prix × quantité), champs selon le projet, classement des inspirations, migration et robustesse de la sauvegarde,
+prix à la mèche, extensions (fourchette, cas sur devis), départ avec extensions sans supplément, pose temporaire avec
+supplément, pose simple, zones de déplacement, acompte jamais ajouté, achat (prix × quantité), champs selon le projet,
+morphologie du visage, vues de face et de profil, classement des rendus, migration de la sauvegarde (versions 1 et 2),
 validation des formulaires, liens WhatsApp.
 
 **Vérifications dans le navigateur**
 - Aucun débordement horizontal sur 11 pages × 6 largeurs (320, 390, 430, 820, 1366, 1920 px) ; aucune erreur console.
 - Menu mobile, logo, tutoiement, liens WhatsApp de contact.
-- Configurateur : étape 1, puis **parcours complet « départ de locks » sur mobile et ordinateur** — champs obligatoires,
-  incompatibilité expliquée, grille, aperçu actualisé, inspiration la plus proche en premier, comparateur côte à côte,
-  localité et zone, totaux « De 137 200 à 160 000 » puis « De 168 200 à 191 000 FCFA », bouton « Modifier », estimation,
-  photo (refus d'un format non accepté, aperçu), **PDF** (validité, montants identiques au récapitulatif, mention
-  d'estimation indicative, coordonnées, logo, absence de la photo de la cliente), **message WhatsApp** (numéro, tous les choix,
+- Configurateur : étape 1, puis **parcours complet en cinq étapes « départ de locks » sur mobile et ordinateur** —
+  champs obligatoires, incompatibilité expliquée, grille, morphologie du visage à la place du style, rendu de face et de
+  profil côte à côte, rappel de la morphologie, absence de vues propres signalée, choix d'un autre rendu, localité et zone,
+  totaux « De 137 200 à 160 000 » puis « De 168 200 à 191 000 FCFA », bouton « Modifier », titres et consignes du
+  récapitulatif et de l'estimation, estimation comme dernière étape, envoi sous l'estimation, photo (refus d'un format
+  non accepté, aperçu), **PDF** (validité, montants identiques au récapitulatif, morphologie, mention d'estimation
+  indicative, coordonnées, logo, absence de la photo de la cliente), **message WhatsApp** (numéro, tous les choix,
   estimation, caractères spéciaux), coordonnées absentes de la sauvegarde, reprise après rechargement.
-- Locks temporaires et achat : règles tarifaires et cas « sur devis ».
-- Services, catalogue (filtres, tri, état vide), galerie (filtres, grand format, clavier), FAQ, conseils, contact.
+- Locks temporaires (extensions fournies ou apportées, base, supplément) et achat : règles tarifaires et cas « sur devis ».
+- Services (grilles, zones), catalogue (filtres, tri, état vide), galerie (filtres, grand format, clavier), FAQ, conseils, contact.
 - **Comparateur avant / après** : libellés, clavier, clic, toucher, image qui suit le curseur.
 - **Référencement** : robots.txt, plan du site (14 adresses), image de partage, titre / description / lien canonique /
   H1 unique, données structurées, page légale non indexée.
@@ -106,11 +109,11 @@ validation des formulaires, liens WhatsApp.
 | Page | Performance | Accessibilité | Bonnes pratiques | Référencement |
 |---|---:|---:|---:|---:|
 | Accueil | 93 | 100 | 100 | 100 |
-| MY LOCKS DESIGN | 96 | 100 | 100 | 100 |
-| Nos services | 95 | 100 | 100 | 100 |
-| Catalogue | 97 | 100 | 100 | 100 |
-| Galerie | 95 | 100 | 100 | 100 |
-| Contact | 99 | 100 | 100 | 100 |
+| MY LOCKS DESIGN | 98 | 100 | 100 | 100 |
+| Nos services | 94 | 100 | 100 | 100 |
+| Catalogue | 94 | 100 | 100 | 100 |
+| Galerie | 100 | 100 | 100 | 100 |
+| Contact | 98 | 100 | 100 | 100 |
 
 Mesure du rendu final. La note de performance varie de quelques points d'une mesure à l'autre
 (une mesure précédente donnait entre 91 et 100 selon les pages).
