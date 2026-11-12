@@ -66,6 +66,8 @@ Tous les autres tarifs restent « communiqués, à confirmer » et sont affiché
     (prix à la mèche × nombre de locks) ;
   - la cliente vient avec ses extensions : **pose simple à 15 000 FCFA**, tarif unique, sans coût d'extensions.
 - La grille de base est le tarif du départ de locks sans ajout d'extensions.
+- Départ de locks **avec extensions** (confirmé le 12/11/2026) : tarif de la grille selon la tranche + le même supplément
+  de 5 000 FCFA (crochet) ou 7 000 FCFA (base peigne), puis les extensions (prix à la mèche × nombre de locks).
 - Achat : prix à la mèche × quantité ; synthétique en « à partir de » ; matières sans tarif et 24–30 pouces : sur devis.
 - Déplacement : ajouté pour les prestations (départ, temporaires), pas pour un achat. Zone 5 ou localité inconnue : sur devis.
 - Acompte : jamais ajouté. Total = somme des montants connus ; « De … à … » en cas de fourchette,
@@ -75,9 +77,9 @@ Tous les autres tarifs restent « communiqués, à confirmer » et sont affiché
 
 1. **Tarifs** : validation de chaque prix et de ses conditions d'application (quelle technique, forfait ou supplément).
 2. ~~Prix à la mèche~~ — validés le 12/11/2026 (locks naturelles 400 à 1 300 FCFA, synthétiques dès 100 FCFA).
-3. ~~Pose temporaire~~ — réglé le 12/11/2026 (voir « Règles de calcul »).
-   Reste une question : pour un **départ de locks avec extensions**, la main-d'œuvre reste-t-elle au tarif de la grille,
-   ou le supplément de 5 000 / 7 000 FCFA s'applique-t-il aussi ? Actuellement : grille seule + coût des extensions.
+3. ~~Pose temporaire et départ avec extensions~~ — réglés le 12/11/2026 (voir « Règles de calcul »).
+   Reste à confirmer : les départs en **twists** et au **peigne** (hors grille) prennent-ils aussi un supplément avec extensions ?
+   Actuellement : non, aucun supplément n'a été défini pour eux.
 4. **Locks synthétiques** : grille de prix par produit. **Semi-naturelles et cheveux humains** : prix inconnus (affichés « Sur devis »).
 5. **Frais de déplacement** : zones 1, 2 et 5 à confirmer (3 et 4 confirmées).
    La localité « Zone 4 » (quartier de Marcory) figure dans la zone tarifaire 3 : à confirmer.

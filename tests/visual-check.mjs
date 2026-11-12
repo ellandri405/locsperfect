@@ -178,7 +178,7 @@ for (const vp of [viewports[1], viewports[4]]) {
   await pick(page, /81 à 100 locks/);
   await pick(page, /Sans extensions/);
   check(await page.getByText(/Sans extensions, la longueur est celle de tes cheveux/).isVisible(), `${tag} — incompatibilité expliquée (sans extensions)`);
-  check((await recapText(page, vp)).includes("34 000 FCFA"), `${tag} — grille : peigne, 81 à 100 locks = 34 000 FCFA`);
+  check((await recapText(page, vp)).includes("34 000 FCFA"), `${tag} — grille sans extensions : peigne, 81 à 100 locks = 34 000 FCFA`);
 
   await pick(page, /Avec extensions/);
   check(await page.getByRole("heading", { level: 2, name: "Matière" }).isVisible(), `${tag} — matière affichée avec extensions`);
@@ -219,7 +219,7 @@ for (const vp of [viewports[1], viewports[4]]) {
   check(await stepIs(page, 5) && (await page.getByText(/Choisis ta localité pour estimer/).isVisible()), `${tag} — localité obligatoire`);
   await page.getByLabel("Localité").selectOption("Koumassi");
   check(norm(await page.locator("#champ-locality").innerText()).includes("Zone 4 — frais de déplacement : 6 000 FCFA."), `${tag} — zone identifiée et frais affichés`);
-  check(norm(await page.getByTestId("total-estimatif").innerText()) === "De 137 200 à 160 000 FCFA", `${tag} — total : 34 000 + 6 000 + 1 200 × (81 à 100 locks)`);
+  check(norm(await page.getByTestId("total-estimatif").innerText()) === "De 144 200 à 167 000 FCFA", `${tag} — total : 34 000 + 7 000 de supplément + 6 000 + 1 200 × (81 à 100 locks)`);
 
   // Modifier un choix depuis le récapitulatif, puis revenir : les autres choix sont conservés.
   await page.getByRole("button", { name: "Modifier : Nombre de locks" }).click();
@@ -228,12 +228,12 @@ for (const vp of [viewports[1], viewports[4]]) {
   await pick(page, /101 à 120 locks/);
   for (let i = 0; i < 3; i++) await next(page);
   check(await stepIs(page, 5), `${tag} — retour au récapitulatif`);
-  check(norm(await page.getByTestId("total-estimatif").innerText()) === "De 168 200 à 191 000 FCFA", `${tag} — total recalculé : 41 000 + 6 000 + 1 200 × (101 à 120 locks)`);
+  check(norm(await page.getByTestId("total-estimatif").innerText()) === "De 175 200 à 198 000 FCFA", `${tag} — total recalculé : 41 000 + 7 000 + 6 000 + 1 200 × (101 à 120 locks)`);
 
   await next(page);
   check(await stepIs(page, 6), `${tag} — étape 6 (estimation)`);
   const est = norm(await page.locator("main").innerText());
-  check(est.includes("Départ de locks — Instantané base peigne") && est.includes("41 000 FCFA") && est.includes("1 200 FCFA la mèche × 101 à 120 locks") && est.includes("De 121 200 à 144 000 FCFA") && est.includes("Frais de déplacement"), `${tag} — détail de l'estimation`);
+  check(est.includes("Départ de locks — Instantané base peigne") && est.includes("48 000 FCFA") && est.includes("dont 7 000 FCFA de supplément avec extensions") && est.includes("1 200 FCFA la mèche × 101 à 120 locks") && est.includes("De 121 200 à 144 000 FCFA") && est.includes("Frais de déplacement"), `${tag} — détail de l'estimation`);
   await page.screenshot({ path: `${OUT}/configurateur-etape6-${vp.name}.png`, fullPage: vp.width > 1000 });
 
   await next(page);
@@ -266,8 +266,8 @@ for (const vp of [viewports[1], viewports[4]]) {
   check(/^lp-locks-projet-\d{4}-\d{2}-\d{2}\.pdf$/.test(download.suggestedFilename()), `${tag} — PDF téléchargé (${download.suggestedFilename()})`);
   check(body.startsWith("%PDF-") && pdf.length > 20000, `${tag} — PDF valide (${Math.round(pdf.length / 1024)} Ko)`);
   for (const [label, needle] of [
-    ["nom de la marque", "LP LOCKS"], ["choix (technique)", "Instantan"], ["montant de la prestation", "41 000 FCFA"],
-    ["frais de déplacement", "6 000 FCFA"], ["extensions", "De 121 200"], ["total identique au récapitulatif", "De 168 200"],
+    ["nom de la marque", "LP LOCKS"], ["choix (technique)", "Instantan"], ["montant de la prestation", "48 000 FCFA"],
+    ["frais de déplacement", "6 000 FCFA"], ["extensions", "De 121 200"], ["total identique au récapitulatif", "De 175 200"],
     ["mention d'estimation indicative", "Estimation indicative, sous r"], ["coordonnées", "+225 07 99 33 16 86"], ["nom de la cliente", "cha Kon"],
   ]) check(body.includes(needle), `${tag} — PDF : ${label}`);
   check(/\/Subtype\s*\/Image/.test(body), `${tag} — PDF : logo intégré`);
@@ -280,7 +280,7 @@ for (const vp of [viewports[1], viewports[4]]) {
   check(url.startsWith("https://wa.me/2250799331686?text="), `${tag} — WhatsApp ouvert sur le bon numéro`);
   const msg = norm(decodeURIComponent(url.split("text=")[1] ?? ""));
   check(
-    ["Nom : Aïcha Koné", "Type de projet : Départ de locks durables", "Technique : Instantané base peigne", "Nombre de locks : 101 à 120 locks", "Matière : Naturelle", "Longueur : 20 pouces (51 cm)", "Couleur : Caramel", "Localité : Koumassi", "Date souhaitée : 15 juin 2030", "caramel & pointes plus claires ?", "Extensions — naturelle, 20 pouces : De 121 200 à 144 000 FCFA", "Total estimatif : De 168 200 à 191 000 FCFA", "je la joins"].every((t) => msg.includes(t)),
+    ["Nom : Aïcha Koné", "Type de projet : Départ de locks durables", "Technique : Instantané base peigne", "Nombre de locks : 101 à 120 locks", "Matière : Naturelle", "Longueur : 20 pouces (51 cm)", "Couleur : Caramel", "Localité : Koumassi", "Date souhaitée : 15 juin 2030", "caramel & pointes plus claires ?", "Extensions — naturelle, 20 pouces : De 121 200 à 144 000 FCFA", "Total estimatif : De 175 200 à 198 000 FCFA", "je la joins"].every((t) => msg.includes(t)),
     `${tag} — message WhatsApp : tous les choix et l'estimation transmis`,
   );
   check(await page.getByText(/n'est pas une\s+réservation/).first().isVisible(), `${tag} — aucune fausse confirmation de réservation`);

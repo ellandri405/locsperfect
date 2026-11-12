@@ -122,6 +122,14 @@ export default function ServicesPage() {
                       supplement={service.id === "temporaire" ? temporaryPoseSupplement : undefined}
                     />}
                   <PriceList prices={prices} />
+                  {service.id === "depart" && (
+                    <p className="mt-3 text-sm leading-relaxed text-charcoal">
+                      Tarifs sans ajout d&apos;extensions. Avec extensions, la main-d&apos;œuvre augmente de{" "}
+                      {formatFcfa(temporaryPoseSupplement["crochet-instantane"])} (instantané au crochet) ou{" "}
+                      {formatFcfa(temporaryPoseSupplement["peigne-instantane"])} (instantané base peigne), et les extensions
+                      s&apos;ajoutent : prix de la mèche multiplié par le nombre de locks.
+                    </p>
+                  )}
                   {service.id === "temporaire" && (
                     <p className="mt-3 text-sm leading-relaxed text-charcoal">
                       Tarifs de la pose selon la base et le nombre de locks. Les extensions fournies par LP LOCKS

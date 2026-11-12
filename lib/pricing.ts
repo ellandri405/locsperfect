@@ -22,7 +22,7 @@ import type { ProjectDraft } from "./project-store";
  * - seuls les montants connus sont additionnés ;
  * - un montant inconnu donne une ligne « Sur devis » / « À confirmer », jamais un chiffre inventé ;
  * - départ de locks : grille par technique et par tranche de vingt locks ;
- * - pose temporaire : même grille + 5 000 (base crochet) ou 7 000 FCFA (base peigne) ;
+ * - avec extensions (départ avec extensions, pose temporaire) : grille + 5 000 (crochet) ou 7 000 FCFA (base peigne) ;
  *   pose simple à 15 000 FCFA si la cliente apporte ses extensions ;
  * - extensions d'une pose = prix à la mèche × nombre de locks (règle confirmée par LP LOCKS
  *   le 12/11/2026). Le nombre de locks étant une tranche, le montant est une fourchette ;
@@ -161,6 +161,12 @@ export function computeEstimate(rawDraft: ProjectDraft): Estimate {
 
   if (draft.projectType === "depart") {
     const start = startPrice(draft.technique, draft.startQuantity);
+    // Départ avec extensions : le supplément de main-d'œuvre s'ajoute au tarif de la grille.
+    const extra = draft.extensions === "avec" && draft.technique ? (temporaryPoseSupplement[draft.technique] ?? 0) : 0;
+    if (start && start.amount !== null && extra > 0) {
+      start.amount += extra;
+      start.detail = [start.detail, `dont ${formatFcfa(extra)} de supplément avec extensions`].filter(Boolean).join(" · ");
+    }
     if (start) lines.push(start);
     if (draft.extensions === "avec") {
       const ext = extensionsLine(draft.material, draft.length, draft.startQuantity);

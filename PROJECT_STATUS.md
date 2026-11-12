@@ -56,8 +56,8 @@ Le site est complet et testé. Il lui manque uniquement des contenus à fournir 
   exploitable à une banque d'images.
 - **Liens WhatsApp** : le lien Business (`wa.me/message/…`) ne transporte pas de message prérempli. Il sert aux boutons
   de contact ; les envois de projet, de commande et de rendez-vous passent par le numéro pour transmettre les choix.
-- **Départ de locks avec extensions** : la main-d'œuvre est comptée au tarif de la grille, plus le coût des extensions.
-  LP LOCKS n'a pas précisé si le supplément de la pose temporaire s'y applique aussi.
+- **Twists et peigne avec extensions** : aucun supplément de main-d'œuvre n'est ajouté pour ces deux techniques hors grille,
+  faute de précision de LP LOCKS.
 - **Finition** du départ de locks : non proposée (liste d'options non communiquée).
 - **Photo d'inspiration de la cliente** : ni envoyée par le site ni ajoutée au PDF ; elle la joint elle-même dans WhatsApp.
 - **Catalogue** : couleur, texture et disponibilité non renseignées.
@@ -90,7 +90,7 @@ validation des formulaires, liens WhatsApp.
 - Menu mobile, logo, tutoiement, liens WhatsApp de contact.
 - Configurateur : étape 1, puis **parcours complet « départ de locks » sur mobile et ordinateur** — champs obligatoires,
   incompatibilité expliquée, grille, aperçu actualisé, inspiration la plus proche en premier, comparateur côte à côte,
-  localité et zone, totaux « De 137 200 à 160 000 » puis « De 168 200 à 191 000 FCFA », bouton « Modifier », estimation,
+  localité et zone, totaux « De 144 200 à 167 000 » puis « De 175 200 à 198 000 FCFA », bouton « Modifier », estimation,
   photo (refus d'un format non accepté, aperçu), **PDF** (validité, montants identiques au récapitulatif, mention
   d'estimation indicative, coordonnées, logo, absence de la photo de la cliente), **message WhatsApp** (numéro, tous les choix,
   estimation, caractères spéciaux), coordonnées absentes de la sauvegarde, reprise après rechargement.
