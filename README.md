@@ -130,13 +130,24 @@ Site Next.js standard, entièrement statique à ce stade : déployable sur Verce
 
 | Variable | Rôle | Valeur |
 |---|---|---|
-| `NEXT_PUBLIC_SITE_URL` | Adresse publique du site (plan du site, liens canoniques, aperçu de partage) | ex. `https://www.mondomaine.com` — **à définir à la mise en ligne** |
+| `NEXT_PUBLIC_SITE_URL` | Adresse publique du site (plan du site, liens canoniques, aperçu de partage) | ex. `https://www.mondomaine.com` — à définir **quand le site a son propre nom de domaine** |
+
+Sur Vercel, aucune variable n'est nécessaire pour un premier déploiement : le site utilise automatiquement
+l'adresse de production du projet (`VERCEL_PROJECT_PRODUCTION_URL`, fournie par Vercel).
 
 Aucune autre variable, aucune clé d'API, aucun secret.
 
+### Déployer sur Vercel
+
+1. Sur vercel.com, se connecter avec GitHub puis « Add New… » → « Project ».
+2. Importer le dépôt, branche `main`. Vercel détecte Next.js : ne rien changer aux réglages
+   (commande de build `npm run build`, dossier de sortie géré par Next.js, aucune variable requise).
+3. Cliquer « Deploy ». Chaque envoi sur `main` redéploie ensuite le site automatiquement.
+4. Après l'ajout d'un nom de domaine : définir `NEXT_PUBLIC_SITE_URL` dans Settings → Environment Variables, puis redéployer.
+
 ### Liste de contrôle avant mise en ligne
 
-1. Définir `NEXT_PUBLIC_SITE_URL`.
+1. Définir `NEXT_PUBLIC_SITE_URL` si le site utilise son propre nom de domaine.
 2. Compléter `data/legal.ts` (la page légale redevient indexable d'elle-même).
 3. Déposer les visuels (`docs/VISUELS.md`) et relancer `npm run build`.
 4. Passer à `"valide"` les tarifs confirmés dans `data/prices.ts` et `data/locations.ts`.

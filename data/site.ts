@@ -2,11 +2,16 @@
 export const site = {
   name: "LP LOCKS",
   /**
-   * Adresse publique du site, sans barre oblique finale. À définir à la mise en ligne
-   * avec la variable d'environnement NEXT_PUBLIC_SITE_URL (ex. https://www.mondomaine.com).
-   * Sert au plan du site, aux liens canoniques et à l'aperçu de partage.
+   * Adresse publique du site, sans barre oblique finale.
+   * Sert au plan du site, aux liens canoniques et à l'aperçu de partage. Ordre de priorité :
+   * 1. NEXT_PUBLIC_SITE_URL, à définir quand le site a son propre nom de domaine (ex. https://www.mondomaine.com) ;
+   * 2. sur Vercel, l'adresse de production du projet, fournie automatiquement ;
+   * 3. en local, http://localhost:3000.
    */
-  url: (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, ""),
+  url: (
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000")
+  ).replace(/\/$/, ""),
   tagline: "Les locks, ton style. Ton identité.",
   description:
     "LP LOCKS, marque spécialisée exclusivement dans les locks à Abidjan : départ de locks durables, pose de locks temporaires, achat de locks et extensions.",
