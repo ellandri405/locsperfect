@@ -120,18 +120,43 @@ describe("estimation — départ de locks", () => {
 });
 
 describe("estimation — locks temporaires", () => {
-  it("pose non chiffrée (fourchette), aucun total inventé", () => {
-    const e = computeEstimate(draft({ projectType: "temporaire", material: "synthetique", length: "12", locality: "Riviera 2" }));
-    expect(e.lines[0]).toMatchObject({ id: "pose", amount: null });
-    expect(e.lines[0].detail?.replace(/\s/g, " ")).toContain("5 000 FCFA (base crochet) ou 7 000 FCFA (base peigne)");
-    expect(e.knownTotal).toBe(4000);
-    expect(e.hasPending).toBe(true);
-    expect(e.totalNote).toMatch(/à confirmer/);
+  const temp = { projectType: "temporaire" as const, material: "naturelle", length: "12", locality: "Riviera 2" };
+
+  it.each([
+    ["crochet-instantane", "60-80", 25000],
+    ["crochet-instantane", "81-100", 30000],
+    ["crochet-instantane", "101-120", 35000],
+    ["peigne-instantane", "60-80", 27000],
+    ["peigne-instantane", "81-100", 34000],
+    ["peigne-instantane", "101-120", 41000],
+  ])("main-d'œuvre : même grille que le départ — %s, %s locks → %i FCFA", (technique, startQuantity, amount) => {
+    const e = computeEstimate(draft({ ...temp, technique, startQuantity }));
+    expect(e.lines[0]).toMatchObject({ id: "pose", amount, confirmed: true });
   });
+
+  it("total complet : pose + extensions (fourchette) + déplacement", () => {
+    // 30 000 (crochet, 81–100) + 700 × (81 à 100) + 4 000 (zone 2)
+    const e = computeEstimate(draft({ ...temp, technique: "crochet-instantane", startQuantity: "81-100" }));
+    expect([e.knownTotal, e.knownTotalMax]).toEqual([90700, 104000]);
+    expect(e.hasPending).toBe(false);
+    expect(e.allConfirmed).toBe(false); // la zone 2 reste « à confirmer »
+  });
+
+  it("plus de 120 locks : pose et extensions sur devis", () => {
+    const e = computeEstimate(draft({ ...temp, technique: "peigne-instantane", startQuantity: "autre" }));
+    expect(e.lines.map((l) => l.pendingText)).toEqual(["Sur devis", "Sur devis"]);
+    expect(e.knownTotal).toBe(4000);
+  });
+
+  it("une technique de départ non valable pour une pose (twists) est ignorée", () => {
+    const e = computeEstimate(draft({ ...temp, technique: "twist", startQuantity: "60-80" }));
+    expect(e.lines[0]).toMatchObject({ id: "pose", amount: null, pendingText: "Base à choisir" });
+  });
+
   it("extensions synthétiques : minimum × nombre de locks, en « à partir de »", () => {
-    const e = computeEstimate(draft({ projectType: "temporaire", material: "synthetique", length: "12", startQuantity: "60-80", locality: "Riviera 2" }));
+    const e = computeEstimate(draft({ ...temp, material: "synthetique", technique: "crochet-instantane", startQuantity: "60-80" }));
     expect(e.lines.find((l) => l.id === "extensions")).toMatchObject({ amount: 6000, from: true });
-    expect(e.knownTotal).toBe(10000);
+    expect(e.knownTotal).toBe(35000);
     expect(e.totalLabel).toMatch(/^À partir de/);
   });
 });

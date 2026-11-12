@@ -60,8 +60,9 @@ Tous les autres tarifs restent « communiqués, à confirmer » et sont affiché
   quel que soit le nombre de locks (confirmé le 12/11/2026).
 - Extensions d'une pose : **prix à la mèche × nombre de locks** (confirmé le 12/11/2026). Comme le nombre de locks est une
   tranche, le résultat est une fourchette. Plus de 120 locks, 24–30 pouces ou matière sans tarif : sur devis.
-- Pose temporaire : la main-d'œuvre n'est pas chiffrée (tarif de base non communiqué). Le supplément par dizaine
-  de locks ajoutée — 5 000 FCFA (base crochet) ou 7 000 FCFA (base peigne) — est affiché à titre d'information.
+- Pose temporaire : la main-d'œuvre suit **la même grille que le départ de locks**, selon la base (crochet ou peigne)
+  et la tranche de vingt locks (précision du 12/11/2026). La cliente choisit la base dans le configurateur.
+  Extensions en plus : prix à la mèche × nombre de locks.
 - Achat : prix à la mèche × quantité ; synthétique en « à partir de » ; matières sans tarif et 24–30 pouces : sur devis.
 - Déplacement : ajouté pour les prestations (départ, temporaires), pas pour un achat. Zone 5 ou localité inconnue : sur devis.
 - Acompte : jamais ajouté. Total = somme des montants connus ; « De … à … » en cas de fourchette,
@@ -71,10 +72,10 @@ Tous les autres tarifs restent « communiqués, à confirmer » et sont affiché
 
 1. **Tarifs** : validation de chaque prix et de ses conditions d'application (quelle technique, forfait ou supplément).
 2. ~~Prix à la mèche~~ — validés le 12/11/2026 (locks naturelles 400 à 1 300 FCFA, synthétiques dès 100 FCFA).
-3. **Pose temporaire** : LP LOCKS a précisé que 5 000 FCFA (base crochet) et 7 000 FCFA (base peigne) sont un supplément
-   de main-d'œuvre par dizaine de locks ajoutée, et que « 15 000 » ne s'applique pas. Restent à préciser pour chiffrer
-   la main-d'œuvre : **le tarif de base** de la pose, **à partir de combien de locks** le supplément s'applique, et s'il est
-   bien compté par dizaine (la grille du départ de locks augmente, elle, par tranche de 20 locks).
+3. **Pose temporaire** : la même grille que le départ de locks est appliquée (25 000 / 30 000 / 35 000 base crochet,
+   27 000 / 34 000 / 41 000 base peigne). LP LOCKS a confirmé la variation par tranche de vingt locks et son application
+   aux deux prestations ; **les montants de base identiques sont une déduction à confirmer**.
+   « Pose simple avec extensions 15 000 FCFA » reste sans conditions d'application.
 4. **Locks synthétiques** : grille de prix par produit. **Semi-naturelles et cheveux humains** : prix inconnus (affichés « Sur devis »).
 5. **Frais de déplacement** : zones 1, 2 et 5 à confirmer (3 et 4 confirmées).
    La localité « Zone 4 » (quartier de Marcory) figure dans la zone tarifaire 3 : à confirmer.

@@ -42,6 +42,7 @@ export const projectTypes: ProjectType[] = [
       "Pour porter des locks sans engagement durable et changer de style quand tu le souhaites.",
     notice: "La pose de locks temporaires nécessite des extensions.",
     customizations: [
+      { id: "technique", label: "Base de la pose", required: true },
       { id: "matiere", label: "Matière", required: true },
       { id: "longueur", label: "Longueur", required: true },
       { id: "quantite", label: "Nombre de locks", required: true },
@@ -181,6 +182,15 @@ export const techniqueOptions: ConfigOption[] = [
     description:
       "Réalisé uniquement au peigne avec un produit fixant (gel ou mousse coiffante). Différent du départ instantané.",
   },
+];
+
+/**
+ * Base de la pose de locks temporaires. Les identifiants sont ceux de la grille tarifaire
+ * (data/prices.ts) : la main-d'œuvre suit le même tarif que le départ de locks.
+ */
+export const temporaryBaseOptions: ConfigOption[] = [
+  { id: "crochet-instantane", label: "Base au crochet", description: "Pose réalisée sur une base au crochet." },
+  { id: "peigne-instantane", label: "Base au peigne", description: "Pose réalisée sur une base au peigne." },
 ];
 
 export const extensionOptions: ConfigOption[] = [

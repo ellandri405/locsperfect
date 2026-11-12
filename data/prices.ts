@@ -55,6 +55,10 @@ export const syntheticLockPrice: Price = {
  * GRILLE DÉPART DE LOCKS — confirmée par LP LOCKS le 11/11/2026.
  * Prix en FCFA selon la technique et le nombre de locks. Au-delà de 120 locks : sur devis.
  * (« Départ simple à partir de 25 000 » = instantané au crochet, première tranche.)
+ *
+ * Précision du 12/11/2026 : cette grille vaut aussi pour la MAIN-D'ŒUVRE DE LA POSE DE LOCKS TEMPORAIRES
+ * (base au crochet ou base au peigne). Le tarif augmente par tranche de vingt locks :
+ * +5 000 FCFA (crochet) ou +7 000 FCFA (peigne).
  */
 export const startQuantityTiers = [
   { id: "60-80", label: "60 à 80 locks", min: 60, max: 80 },
@@ -91,19 +95,6 @@ export const flatStartPrices: Price[] = [
     status: "valide",
   },
 ];
-
-/**
- * POSE DE LOCKS TEMPORAIRES — précision de LP LOCKS du 12/11/2026 :
- * les montants de 5 000 et 7 000 FCFA sont un SUPPLÉMENT de main-d'œuvre par dizaine de locks ajoutée,
- * selon la base (crochet ou peigne). Ce ne sont pas le prix de la pose.
- * Le tarif de base de la pose et le seuil à partir duquel le supplément s'applique n'ont pas été
- * communiqués : la main-d'œuvre n'est donc pas chiffrée dans l'estimation.
- */
-export const temporaryLabourSupplement = {
-  /** FCFA par dizaine de locks ajoutée. */
-  perTenLocks: { crochet: 5000, peigne: 7000 },
-  status: "valide" as const,
-};
 
 /** Autres prestations communiquées. Conditions d'application à préciser par LP LOCKS. */
 export const servicePrices: Price[] = [

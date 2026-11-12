@@ -10,11 +10,10 @@ import {
   startQuantityOptions,
   strandQuantity,
   styleOptions,
-  techniqueOptions,
   textureOptions,
   thicknessOptions,
 } from "@/data/configurator";
-import { fieldsFor, type FieldId, type FieldRule } from "@/lib/configurator";
+import { fieldsFor, techniquesFor, type FieldId, type FieldRule } from "@/lib/configurator";
 import { formatFcfa } from "@/lib/format";
 import { lineAmountLabel, materialPriceHint, startPrice, strandPrice } from "@/lib/pricing";
 import type { ProjectDraft } from "@/lib/project-store";
@@ -51,7 +50,7 @@ export function StepCustomize({ draft, onChange, showErrors }: Props) {
       case "technique":
         return (
           <div className="grid gap-3 sm:grid-cols-2">
-            {techniqueOptions.map((option) => {
+            {techniquesFor(draft.projectType).map((option) => {
               const price = startPrice(option.id, draft.startQuantity);
               return (
                 <OptionCard

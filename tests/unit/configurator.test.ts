@@ -17,11 +17,18 @@ describe("champs selon le projet", () => {
     expect(fields.find((f) => f.id === "material")?.required).toBe(true);
     expect(fields.find((f) => f.id === "length")?.required).toBe(true);
   });
-  it("locks temporaires : matière, longueur et nombre de locks obligatoires, pas de technique", () => {
+  it("locks temporaires : base, matière, longueur et nombre de locks obligatoires, pas de choix d'extensions", () => {
     const d = draft({ projectType: "temporaire" });
-    expect(ids(d)).not.toContain("technique");
     expect(ids(d)).not.toContain("extensions");
-    expect(missingFields(d).map((f) => f.id)).toEqual(["material", "length", "startQuantity"]);
+    expect(missingFields(d).map((f) => f.id)).toEqual(["technique", "material", "length", "startQuantity"]);
+    expect(fieldsFor(d)[0].label).toBe("Base de la pose");
+  });
+  it("locks temporaires : seules les bases crochet et peigne sont valables", () => {
+    const twist = draft({ projectType: "temporaire", technique: "twist", material: "naturelle", length: "12", startQuantity: "60-80" });
+    expect(missingFields(twist).map((f) => f.id)).toEqual(["technique"]);
+    const crochet = { ...twist, technique: "crochet-instantane" };
+    expect(missingFields(crochet)).toEqual([]);
+    expect(summaryRows(crochet).find((r) => r.id === "technique")?.value).toBe("Base au crochet");
   });
   it("achat : nombre de mèches, jamais de nombre de locks posées", () => {
     const d = draft({ projectType: "achat" });

@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { Info } from "lucide-react";
 import type { Price, ProjectTypeId } from "@/types";
 import { services } from "@/data/services";
-import { depositReference, getPrice, servicePrices, startPriceGrid, startQuantityTiers, temporaryLabourSupplement } from "@/data/prices";
+import { depositReference, getPrice, servicePrices, startPriceGrid, startQuantityTiers } from "@/data/prices";
 import { travelZones } from "@/data/locations";
-import { materialOptions, techniqueOptions } from "@/data/configurator";
+import type { ConfigOption } from "@/types";
+import { materialOptions, techniqueOptions, temporaryBaseOptions } from "@/data/configurator";
 import { formatFcfa } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { Badge } from "@/components/ui/badge";
@@ -115,14 +116,12 @@ export default function ServicesPage() {
                   )}
 
                   <h3 className="mt-8 mb-3 text-sm font-bold">Tarifs</h3>
-                  {service.id === "depart" && <StartPriceTable />}
+                  {service.id !== "achat" && <StartPriceTable name={service.name} labels={service.id === "temporaire" ? temporaryBaseOptions : techniqueOptions} />}
                   <PriceList prices={prices} />
                   {service.id === "temporaire" && (
                     <p className="mt-3 text-sm leading-relaxed text-charcoal">
-                      Main-d&apos;œuvre : supplément par dizaine de locks ajoutée de{" "}
-                      {formatFcfa(temporaryLabourSupplement.perTenLocks.crochet)} (base au crochet) ou{" "}
-                      {formatFcfa(temporaryLabourSupplement.perTenLocks.peigne)} (base au peigne). Les extensions sont comptées
-                      au prix de la mèche multiplié par le nombre de locks.
+                      La main-d&apos;œuvre suit la même grille que le départ de locks, selon la base (crochet ou peigne). Les
+                      extensions s&apos;ajoutent : prix de la mèche multiplié par le nombre de locks.
                     </p>
                   )}
                   {service.id === "achat" && (
@@ -222,12 +221,12 @@ function StartProjectButtonSecondary() {
 }
 
 /** Grille du départ de locks : technique × nombre de locks. */
-function StartPriceTable() {
+function StartPriceTable({ labels, name }: { labels: ConfigOption[]; name: string }) {
   return (
     <div className="mb-4">
-      <div role="region" aria-label="Grille tarifaire du départ de locks" tabIndex={0} className="-mx-5 overflow-x-auto px-5 md:mx-0 md:px-0">
+      <div role="region" aria-label={`Grille tarifaire — ${name}`} tabIndex={0} className="-mx-5 overflow-x-auto px-5 md:mx-0 md:px-0">
         <table className="w-full min-w-[30rem] border-collapse text-left text-[0.9375rem]">
-          <caption className="sr-only">Tarifs du départ de locks instantané selon la technique et le nombre de locks</caption>
+          <caption className="sr-only">{name} : tarifs de la main-d&apos;œuvre selon la technique et le nombre de locks</caption>
           <thead>
             <tr className="border-b border-ink/20 text-sm">
               <th scope="col" className="py-3 pr-4 font-semibold text-charcoal">
@@ -244,7 +243,7 @@ function StartPriceTable() {
             {Object.entries(startPriceGrid).map(([technique, row]) => (
               <tr key={technique} className="border-b border-line">
                 <th scope="row" className="py-3.5 pr-4 font-semibold">
-                  {techniqueOptions.find((t) => t.id === technique)?.label}
+                  {labels.find((t) => t.id === technique)?.label}
                 </th>
                 {startQuantityTiers.map((tier) => (
                   <td key={tier.id} className="px-2 py-3.5 text-right font-bold whitespace-nowrap">

@@ -1,5 +1,5 @@
 import type { Price } from "@/types";
-import { lengthOptions, materialOptions, startQuantityOptions, techniqueOptions } from "@/data/configurator";
+import { lengthOptions, materialOptions, startQuantityOptions, techniqueOptions, temporaryBaseOptions } from "@/data/configurator";
 import { findZoneByLocality } from "@/data/locations";
 import {
   flatStartPrices,
@@ -7,7 +7,6 @@ import {
   startPriceGrid,
   startQuantityTiers,
   syntheticLockPrice,
-  temporaryLabourSupplement,
   type StartTierId,
 } from "@/data/prices";
 import { effectiveDraft, needsLocality } from "./configurator";
@@ -20,6 +19,7 @@ import type { ProjectDraft } from "./project-store";
  * Principes :
  * - seuls les montants connus sont additionnés ;
  * - un montant inconnu donne une ligne « Sur devis » / « À confirmer », jamais un chiffre inventé ;
+ * - main-d'œuvre (départ de locks ET pose temporaire) : grille par technique et par tranche de vingt locks ;
  * - extensions d'une pose = prix à la mèche × nombre de locks (règle confirmée par LP LOCKS
  *   le 12/11/2026). Le nombre de locks étant une tranche, le montant est une fourchette ;
  * - l'acompte n'est jamais ajouté.
@@ -165,15 +165,15 @@ export function computeEstimate(rawDraft: ProjectDraft): Estimate {
   }
 
   if (draft.projectType === "temporaire") {
-    const { crochet, peigne } = temporaryLabourSupplement.perTenLocks;
-    lines.push({
-      id: "pose",
-      label: "Pose de locks temporaires — main-d'œuvre",
-      detail: `Tarif de base à confirmer · supplément par dizaine de locks ajoutée : ${formatFcfa(crochet)} (base crochet) ou ${formatFcfa(peigne)} (base peigne)`,
-      amount: null,
-      pendingText: "À confirmer",
-      confirmed: false,
-    });
+    // Main-d'œuvre : même grille que le départ de locks, selon la base et la tranche de vingt locks.
+    const base = temporaryBaseOptions.find((b) => b.id === draft.technique);
+    const grid = base ? startPriceGrid[base.id] : undefined;
+    const tier = startQuantityTiers.find((t) => t.id === draft.startQuantity);
+    const pose = { id: "pose", label: `Pose de locks temporaires${base ? ` — ${base.label}` : ""}`, confirmed: true };
+    if (!grid) lines.push({ ...pose, amount: null, pendingText: "Base à choisir" });
+    else if (draft.startQuantity === "autre") lines.push({ ...pose, detail: "Plus de 120 locks", amount: null, pendingText: "Sur devis" });
+    else if (!tier) lines.push({ ...pose, detail: "Nombre de locks à choisir", amount: grid["60-80"], from: true });
+    else lines.push({ ...pose, detail: tier.label, amount: grid[tier.id] });
     const ext = extensionsLine(draft.material, draft.length, draft.startQuantity);
     if (ext) lines.push(ext);
   }

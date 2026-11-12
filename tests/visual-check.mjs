@@ -303,7 +303,9 @@ for (const vp of [viewports[1], viewports[4]]) {
   await page.goto(BASE + "/my-locks-design", { waitUntil: "networkidle" });
   await pick(page, /Locks temporaires/);
   await next(page);
-  check((await page.getByRole("heading", { level: 2, name: "Technique" }).count()) === 0 && (await page.getByRole("heading", { level: 2, name: "Extensions" }).count()) === 0, "temporaires — pas de technique ni de choix d'extensions");
+  check((await page.getByRole("heading", { level: 2, name: "Base de la pose" }).count()) === 1 && (await page.getByRole("heading", { level: 2, name: "Extensions" }).count()) === 0, "temporaires — choix de la base, pas de choix d'extensions");
+  check((await page.locator('input[name="technique"]').count()) === 2, "temporaires — deux bases proposées (crochet, peigne)");
+  await pick(page, /Base au crochet/);
   check(await page.getByText(/nécessite des extensions : choisis leur matière/).isVisible(), "temporaires — extensions obligatoires rappelées");
   await pick(page, /^Synthétique/);
   await pick(page, /24 à 30 pouces/);
@@ -314,14 +316,21 @@ for (const vp of [viewports[1], viewports[4]]) {
   for (let i = 0; i < 3; i++) await next(page);
   await page.getByLabel("Localité").selectOption("Yopougon");
   check(norm(await page.locator("#champ-locality").innerText()).includes("Zone 5 — frais de déplacement sur devis"), "temporaires — zone 5 : frais sur devis");
-  check(norm(await page.getByTestId("total-estimatif").innerText()) === "Sur devis", "temporaires — aucun montant inventé : total « Sur devis »");
+  check(norm(await page.getByTestId("total-estimatif").innerText()) === "À partir de 25 000 FCFA", "temporaires — pose 25 000 FCFA ; extensions et déplacement sur devis, non additionnés");
   // Longueur chiffrable : extensions synthétiques = 100 FCFA × 60 à 80 locks, en « à partir de ».
   await page.getByRole("button", { name: "Modifier : Longueur" }).click();
   await page.waitForTimeout(500);
   await pickValue(page, "longueur", "12");
   for (let i = 0; i < 3; i++) await next(page);
   await page.getByLabel("Localité").selectOption("Riviera 2");
-  check(norm(await page.getByTestId("total-estimatif").innerText()) === "À partir de 10 000 FCFA", "temporaires — 100 FCFA × 60 locks + 4 000 de déplacement, pose à confirmer");
+  check(norm(await page.getByTestId("total-estimatif").innerText()) === "À partir de 35 000 FCFA", "temporaires — pose 25 000 + extensions 100 FCFA × 60 locks + déplacement 4 000");
+  await page.getByRole("button", { name: "Modifier : Base de la pose" }).click();
+  await page.waitForTimeout(500);
+  await pick(page, /Base au peigne/);
+  await pick(page, /101 à 120 locks/);
+  await pickValue(page, "matiere", "naturelle");
+  for (let i = 0; i < 3; i++) await next(page);
+  check(norm(await page.getByTestId("total-estimatif").innerText()) === "De 115 700 à 129 000 FCFA", "temporaires — peigne 41 000 + 700 FCFA × (101 à 120 locks) + déplacement 4 000");
 
   await page.getByRole("button", { name: "Modifier : Type de projet" }).click();
   await page.waitForTimeout(500);
@@ -368,6 +377,8 @@ for (const vp of [viewports[1], viewports[4]]) {
   const rows = (await page.locator("#depart table tbody tr").allInnerTexts()).map((t) => norm(t).replace(/\s+/g, " "));
   check(rows[0] === "Instantané au crochet 25 000 FCFA 30 000 FCFA 35 000 FCFA", `services — grille crochet (${rows[0]})`);
   check(rows[1] === "Instantané base peigne 27 000 FCFA 34 000 FCFA 41 000 FCFA", `services — grille base peigne (${rows[1]})`);
+  const tempRows = (await page.locator("#temporaire table tbody tr").allInnerTexts()).map((t) => norm(t).replace(/\s+/g, " "));
+  check(tempRows[0] === "Base au crochet 25 000 FCFA 30 000 FCFA 35 000 FCFA" && tempRows[1] === "Base au peigne 27 000 FCFA 34 000 FCFA 41 000 FCFA", "services — même grille pour la pose de locks temporaires");
   check(await page.locator("#depart").getByText("Au-delà de 120 locks : sur devis.", { exact: true }).isVisible(), "services — au-delà de 120 locks : sur devis");
   const zones = norm(await page.locator("#deplacement").innerText());
   check(/Zone 3\s+5 000 FCFA/.test(zones) && /Zone 4\s+6 000 FCFA/.test(zones) && /Zone 5\s+Sur devis/.test(zones), "services — zones 3 (5 000), 4 (6 000) et 5 (sur devis)");

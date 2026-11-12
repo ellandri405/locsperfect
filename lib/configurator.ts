@@ -7,6 +7,7 @@ import {
   startQuantityOptions,
   styleOptions,
   techniqueOptions,
+  temporaryBaseOptions,
   textureOptions,
   thicknessOptions,
 } from "@/data/configurator";
@@ -68,8 +69,18 @@ export function fieldsFor(draft: ProjectDraft): FieldRule[] {
     }
     case "temporaire":
       // Les extensions sont obligatoires pour une pose temporaire : la matière l'est donc aussi.
-      // Le nombre de locks sert à chiffrer les extensions (prix à la mèche × nombre de locks).
-      return [rule("material", true), rule("length", true), rule("startQuantity", true), rule("color"), rule("texture"), rule("thickness"), rule("style")];
+      // La base (crochet ou peigne) et le nombre de locks fixent la main-d'œuvre ; le nombre de locks sert aussi
+      // à chiffrer les extensions (prix à la mèche × nombre de locks).
+      return [
+        { ...rule("technique", true), label: "Base de la pose" },
+        rule("material", true),
+        rule("length", true),
+        rule("startQuantity", true),
+        rule("color"),
+        rule("texture"),
+        rule("thickness"),
+        rule("style"),
+      ];
     case "achat":
       return [rule("material", true), rule("length", true), rule("strandQuantity", true), rule("color"), rule("texture")];
     default:
@@ -77,10 +88,17 @@ export function fieldsFor(draft: ProjectDraft): FieldRule[] {
   }
 }
 
+/** Techniques proposées selon le projet : quatre pour un départ, deux bases pour une pose temporaire. */
+export function techniquesFor(projectType: ProjectDraft["projectType"]) {
+  return projectType === "temporaire" ? temporaryBaseOptions : techniqueOptions;
+}
+
 /** Brouillon dont les champs non applicables au projet sont remis à vide (pour le résumé et le calcul). */
 export function effectiveDraft(draft: ProjectDraft): ProjectDraft {
   const visible = new Set(fieldsFor(draft).map((f) => f.id));
   const clean = { ...draft };
+  // Une technique choisie pour un autre projet (ex. twists) n'est pas valable pour une pose temporaire.
+  if (clean.technique && !techniquesFor(clean.projectType).some((t) => t.id === clean.technique)) clean.technique = null;
   for (const id of Object.keys(fieldLabels) as FieldId[]) {
     if (id !== "strandQuantity" && !visible.has(id)) clean[id] = null;
   }
@@ -88,7 +106,8 @@ export function effectiveDraft(draft: ProjectDraft): ProjectDraft {
 }
 
 /** Champs obligatoires non renseignés. */
-export function missingFields(draft: ProjectDraft): FieldRule[] {
+export function missingFields(rawDraft: ProjectDraft): FieldRule[] {
+  const draft = effectiveDraft(rawDraft);
   return fieldsFor(draft).filter((f) => f.required && f.id !== "strandQuantity" && !draft[f.id]);
 }
 
@@ -105,11 +124,13 @@ const optionSets: Record<Exclude<FieldId, "strandQuantity">, { id: string; label
 };
 
 /** Libellé lisible de la valeur d'un champ, null si non renseigné. */
-export function fieldValueLabel(draft: ProjectDraft, id: FieldId): string | null {
-  if (id === "strandQuantity") return `${draft.strandQuantity} ${draft.strandQuantity > 1 ? "mèches" : "mèche"}`;
+export function fieldValueLabel(rawDraft: ProjectDraft, id: FieldId): string | null {
+  if (id === "strandQuantity") return `${rawDraft.strandQuantity} ${rawDraft.strandQuantity > 1 ? "mèches" : "mèche"}`;
+  const draft = effectiveDraft(rawDraft);
   const value = draft[id];
   if (!value) return null;
-  const option = optionSets[id].find((o) => o.id === value);
+  const options = id === "technique" ? techniquesFor(draft.projectType) : optionSets[id];
+  const option = options.find((o) => o.id === value);
   if (!option) return null;
   if (id === "length") return `${option.description} (${option.detail})`;
   return option.label;
