@@ -70,11 +70,12 @@ export const startPriceGrid: Record<string, Record<StartTierId, number>> = {
 };
 
 /**
- * SUPPLÉMENT DE MAIN-D'ŒUVRE AVEC EXTENSIONS — confirmé par LP LOCKS le 12/11/2026.
- * Dès que des extensions sont posées (pose de locks temporaires, ou départ de locks avec extensions),
- * la main-d'œuvre = tarif de la grille selon la tranche + ce supplément selon la base.
- * Les extensions elles-mêmes s'ajoutent (prix à la mèche × nombre de locks).
- * Ne concerne que les deux techniques de la grille (crochet et base peigne).
+ * POSE DE LOCKS TEMPORAIRES — confirmé par LP LOCKS le 12/11/2026.
+ * Main-d'œuvre = grille du départ de locks + supplément selon la base.
+ * Les extensions fournies par LP LOCKS s'ajoutent (prix à la mèche × nombre de locks).
+ *
+ * Ce supplément NE s'applique PAS au départ de locks avec extensions : celui-ci reste au tarif
+ * de la grille, auquel s'ajoute seulement le prix des extensions (décision du 12/11/2026).
  */
 export const temporaryPoseSupplement: Record<string, number> = {
   "crochet-instantane": 5000,

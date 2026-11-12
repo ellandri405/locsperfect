@@ -85,15 +85,14 @@ describe("estimation — départ de locks", () => {
   });
 
   it("avec extensions : prix à la mèche × nombre de locks, en fourchette", () => {
-    // 81 à 100 locks × 800 FCFA = 64 800 à 80 000 ; + 30 000 (départ) + 5 000 (supplément) + 2 000 (zone 1).
+    // 81 à 100 locks × 800 FCFA = 64 800 à 80 000 ; + 30 000 (départ) + 2 000 (zone 1).
     const e = computeEstimate(draft({ ...base, extensions: "avec", material: "naturelle", length: "14", locality: "Angré" }));
     const ext = e.lines.find((l) => l.id === "extensions");
     expect(ext).toMatchObject({ unitPrice: 800, amount: 64800, amountMax: 80000 });
-    expect(e.lines[0]).toMatchObject({ id: "depart", amount: 35000 });
-    expect(e.knownTotal).toBe(101800);
-    expect(e.knownTotalMax).toBe(117000);
+    expect(e.knownTotal).toBe(96800);
+    expect(e.knownTotalMax).toBe(112000);
     expect(e.hasPending).toBe(false);
-    expect(e.totalLabel.replace(/\s/g, " ")).toBe("De 101 800 à 117 000 FCFA");
+    expect(e.totalLabel.replace(/\s/g, " ")).toBe("De 96 800 à 112 000 FCFA");
   });
 
   it("avec extensions : matière sans tarif, 24 à 30 pouces ou plus de 120 locks → sur devis", () => {
@@ -169,17 +168,16 @@ describe("estimation — locks temporaires", () => {
     expect([e.knownTotal, e.knownTotalMax]).toEqual([19000, 19000]);
   });
 
-  it("départ de locks : supplément uniquement avec extensions, selon la technique et la tranche", () => {
+  it("départ de locks : même tarif avec ou sans extensions (le supplément est réservé à la pose temporaire)", () => {
     const start = (technique: string, startQuantity: string, extensions: string) =>
       computeEstimate(draft({ projectType: "depart", technique, startQuantity, extensions, material: "naturelle", length: "12" })).lines[0].amount;
-    expect(start("peigne-instantane", "60-80", "sans")).toBe(27000);
-    expect(start("peigne-instantane", "60-80", "avec")).toBe(34000);
-    expect(start("peigne-instantane", "101-120", "avec")).toBe(48000);
-    expect(start("crochet-instantane", "81-100", "sans")).toBe(30000);
-    expect(start("crochet-instantane", "81-100", "avec")).toBe(35000);
-    // Twists et peigne simple : pas de supplément défini.
-    expect(start("twist", "60-80", "avec")).toBe(10000);
-    expect(start("peigne", "60-80", "avec")).toBe(20000);
+    for (const extensions of ["sans", "avec"]) {
+      expect(start("crochet-instantane", "60-80", extensions)).toBe(25000);
+      expect(start("crochet-instantane", "101-120", extensions)).toBe(35000);
+      expect(start("peigne-instantane", "81-100", extensions)).toBe(34000);
+      expect(start("twist", "60-80", extensions)).toBe(10000);
+      expect(start("peigne", "60-80", extensions)).toBe(20000);
+    }
   });
 
   it("provenance des extensions non choisie : rien n'est chiffré", () => {

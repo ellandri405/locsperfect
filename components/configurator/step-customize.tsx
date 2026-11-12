@@ -51,9 +51,7 @@ export function StepCustomize({ draft, onChange, showErrors }: Props) {
         return (
           <div className="grid gap-3 sm:grid-cols-2">
             {techniquesFor(draft.projectType).map((option) => {
-              // Le supplément s'applique dès que des extensions sont posées.
-              const withExtensions = draft.projectType === "temporaire" || draft.extensions === "avec";
-              const supplement = withExtensions ? (temporaryPoseSupplement[option.id] ?? 0) : 0;
+              const supplement = draft.projectType === "temporaire" ? (temporaryPoseSupplement[option.id] ?? 0) : 0;
               const start = startPrice(option.id, draft.startQuantity);
               const price = start && start.amount !== null ? { ...start, amount: start.amount + supplement } : start;
               return (

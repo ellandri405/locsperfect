@@ -124,10 +124,8 @@ export default function ServicesPage() {
                   <PriceList prices={prices} />
                   {service.id === "depart" && (
                     <p className="mt-3 text-sm leading-relaxed text-charcoal">
-                      Tarifs sans ajout d&apos;extensions. Avec extensions, la main-d&apos;œuvre augmente de{" "}
-                      {formatFcfa(temporaryPoseSupplement["crochet-instantane"])} (instantané au crochet) ou{" "}
-                      {formatFcfa(temporaryPoseSupplement["peigne-instantane"])} (instantané base peigne), et les extensions
-                      s&apos;ajoutent : prix de la mèche multiplié par le nombre de locks.
+                      Avec extensions, le tarif du départ reste le même : seul le prix des extensions s&apos;ajoute, soit le
+                      prix de la mèche multiplié par le nombre de locks.
                     </p>
                   )}
                   {service.id === "temporaire" && (
